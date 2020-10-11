@@ -166,13 +166,16 @@ void Map::update(int fElapsedTime)
 
     m_Player.update(fElapsedTime, m_Map, m_width, m_height);
 
-    if (m_Player.m_PlayerPos.x - xScreen > 13.4)
-        xScreen = m_Player.m_PlayerPos.x - 13.4;
+    if (m_Player.m_PlayerPos.x - xScreen > 7)
+        xScreen = m_Player.m_PlayerPos.x - 7;
     if (m_Player.m_PlayerPos.x - xScreen < 1.6)
         xScreen = m_Player.m_PlayerPos.x - 1.6;
 
     if (xScreen < 0)
         xScreen = 0;
+
+    if (xScreen > m_width - 16)
+        xScreen = m_width - 16;
 
     yScreen = m_Player.m_PlayerPos.y - 6.5;
 
