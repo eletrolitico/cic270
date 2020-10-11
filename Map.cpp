@@ -15,9 +15,9 @@ Map::Map() : m_width(32), m_height(11), m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0
     m_Map += "................................";
     m_Map += "................................";
     m_Map += "................................";
-    m_Map += ".........EGGD...................";
+    m_Map += ".........RTTY...................";
     m_Map += "................................";
-    m_Map += "..................EGD...........";
+    m_Map += "..................RTY...........";
     m_Map += "...........EGD..................";
     m_Map += "...........LUK..................";
     m_Map += "EGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGD";
@@ -90,12 +90,19 @@ Map::Map() : m_width(32), m_height(11), m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0
 
 Map::~Map()
 {
+    SoundEngine->drop();
 }
 
 Tile Map::getTile(char c, int width)
 {
     switch (c)
     {
+    case 'R':
+        return m_Tiles[1];
+    case 'T':
+        return m_Tiles[2];
+    case 'Y':
+        return m_Tiles[3];
     case 'E':
         return m_Tiles[width + 1];
     case 'G':
@@ -115,6 +122,7 @@ Tile Map::getTile(char c, int width)
     case 'B':
         return m_Tiles[3 * width + 3];
     }
+    return m_Tiles[0];
 }
 
 void Map::draw(Renderer r)
