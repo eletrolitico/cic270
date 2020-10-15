@@ -31,8 +31,8 @@ bool check_al_errors()
             std::cerr << "UNKNOWN AL ERROR: " << error;
         }
         std::cerr << std::endl;
-        return false;
         raise(SIGTRAP);
+        return false;
     }
     return true;
 }
@@ -64,8 +64,8 @@ bool check_alc_errors(ALCdevice *device)
             std::cerr << "UNKNOWN ALC ERROR: " << error;
         }
         std::cerr << std::endl;
-        return false;
         raise(SIGTRAP);
+        return false;
     }
     return true;
 }
@@ -102,7 +102,7 @@ SoundEngine::~SoundEngine()
     alcCloseDevice(m_ALDevice);
 }
 
-bool SoundEngine::loadAudio(const std::string &path, const std::string &name, float gain)
+bool SoundEngine::loadAudio(const std::string &path, const std::string &name, float gain, bool repeat)
 {
     int channels, sample_rate;
     short *data;
@@ -110,6 +110,7 @@ bool SoundEngine::loadAudio(const std::string &path, const std::string &name, fl
 
     ALuint buf;
     alGenBuffers(1, &buf);
+    check_al_errors();
 
     ALenum format;
     if (channels == 1)
@@ -127,34 +128,41 @@ bool SoundEngine::loadAudio(const std::string &path, const std::string &name, fl
         size *= 2;
 
     alBufferData(buf, format, data, size, sample_rate);
+    check_al_errors();
 
     ALuint source;
     alGenSources(1, &source);
+    check_al_errors();
     alSourcef(source, AL_PITCH, 1);
+    check_al_errors();
     alSourcef(source, AL_GAIN, gain);
+    check_al_errors();
     alSource3f(source, AL_POSITION, 0, 0, 0);
+    check_al_errors();
     alSource3f(source, AL_VELOCITY, 0, 0, 0);
-    alSourcei(source, AL_LOOPING, AL_FALSE);
+    check_al_errors();
+    alSourcei(source, AL_LOOPING, repeat);
+    check_al_errors();
     alSourcei(source, AL_BUFFER, buf);
+    check_al_errors();
 
-    m_SMap[name] = {buf, source, false};
+    m_SMap[name] = {buf, source, repeat};
+
+    if (repeat)
+    {
+        alSourcePlay(m_SMap[name].source);
+        check_al_errors();
+    }
 
     return true;
 }
 
-void SoundEngine::playAudio(const std::string &name, bool repeat)
+void SoundEngine::playAudio(const std::string &name)
 {
     alSourcePlay(m_SMap[name].source);
-    m_SMap[name].repeat = repeat;
+    check_al_errors();
 }
 
 void SoundEngine::update()
 {
-    ALint state;
-    for (auto a : m_SMap)
-    {
-        alGetSourcei(a.second.source, AL_SOURCE_STATE, &state);
-        if (a.second.repeat && state != AL_PLAYING)
-            alSourcePlay(a.second.source);
-    }
 }

@@ -19,8 +19,8 @@ class SoundEngine
 public:
     SoundEngine();
     ~SoundEngine();
-    bool loadAudio(const std::string &path, const std::string &name, float gain = 1.0f);
-    void playAudio(const std::string &name, bool repeat = false);
+    bool loadAudio(const std::string &path, const std::string &name, float gain = 1.0f, bool repeat = false);
+    void playAudio(const std::string &name);
     void update();
 
 private:
