@@ -5,13 +5,12 @@
 #include <memory>
 #include <map>
 
-#include "irrklang/irrKlang.h"
-
 #include "Renderer.h"
 #include "Tile.h"
 #include "VertexBuffer.h"
 #include "Texture.h"
 #include "Player.h"
+#include "SoundEngine.h"
 
 class Map
 {
@@ -32,7 +31,7 @@ private:
 
     Player m_Player;
 
-    irrklang::ISoundEngine *SoundEngine;
+    SoundEngine m_Sound;
 
     Tile getTile(char, int);
 

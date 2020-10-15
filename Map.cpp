@@ -5,7 +5,6 @@
 #include <iostream>
 #include "VertexBufferLayout.h"
 
-irrklang::ISoundSource *jump;
 Map::Map() : m_width(32), m_height(11), m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
 {
     int fSize = m_height * m_width * 24;
@@ -73,24 +72,21 @@ Map::Map() : m_width(32), m_height(11), m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0
     // Unbind Vertex Array Object.
     m_VAO->Unbind();
 
-    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    GLCall(glEnable(GL_BLEND));
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
 
     m_Shader = std::make_unique<Shader>("res/shaders/Tile.shader");
 
     delete positions;
 
     // Sound
-    SoundEngine = irrklang::createIrrKlangDevice();
-    SoundEngine->play2D("res/audio/cobblestone_village.mp3", true);
-    SoundEngine->setSoundVolume(0.5);
-    jump = SoundEngine->addSoundSourceFromFile("res/audio/jump.ogg", irrklang::ESM_NO_STREAMING, true);
-    jump->setForcedStreamingThreshold(-1);
+    m_Sound.loadAudio("res/audio/jump.ogg", "jump", 0.6f);
+    m_Sound.loadAudio("res/audio/cobblestone_village.ogg", "music", 0.5f);
+    m_Sound.playAudio("music");
 }
 
 Map::~Map()
 {
-    SoundEngine->drop();
 }
 
 Tile Map::getTile(char c, int width)
@@ -127,8 +123,8 @@ Tile Map::getTile(char c, int width)
 
 void Map::draw(Renderer r)
 {
-    GLCall(glClearColor(53 / 100.0f, 81 / 100.0f, 92 / 100.0f, 1.0f));
-    GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    glClearColor(53 / 100.0f, 81 / 100.0f, 92 / 100.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     m_Texture->Bind();
 
@@ -154,7 +150,7 @@ void Map::update(int fElapsedTime)
     if ((m_keys[32] || m_keys['w']))
     {
         if (m_Player.m_Ground)
-            SoundEngine->play2D(jump);
+            m_Sound.playAudio("jump");
         m_Player.jump();
     }
     if (m_keys['d'])
@@ -183,6 +179,7 @@ void Map::update(int fElapsedTime)
         yScreen = 0;
 
     m_View = glm::translate(glm::mat4(1), glm::vec3(-xScreen, -yScreen, 0));
+    m_Sound.update();
 }
 
 void Map::keyboardDown(unsigned char key, int x, int y)

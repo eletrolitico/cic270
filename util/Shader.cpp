@@ -15,7 +15,7 @@ Shader::Shader(const std::string &filepath) : m_FilePath(filepath), m_RendererID
 
 Shader::~Shader()
 {
-	GLCall(glDeleteProgram(m_RendererID));
+	glDeleteProgram(m_RendererID);
 }
 
 ShaderProgramSource Shader::ParseShader(const std::string &filePath)
@@ -94,12 +94,12 @@ unsigned int Shader::CreateShader(const std::string &vertexShader, const std::st
 
 void Shader::Bind() const
 {
-	GLCall(glUseProgram(m_RendererID));
+	glUseProgram(m_RendererID);
 }
 
 void Shader::Unbind() const
 {
-	GLCall(glUseProgram(0));
+	glUseProgram(0);
 }
 
 void Shader::setUniform4f(const std::string &name, float f1, float f2, float f3, float f4)
@@ -107,7 +107,7 @@ void Shader::setUniform4f(const std::string &name, float f1, float f2, float f3,
 	int location = GetUniformLocation(name);
 	if (location == -1)
 		return;
-	GLCall(glUniform4f(location, f1, f2, f3, f4));
+	glUniform4f(location, f1, f2, f3, f4);
 }
 
 void Shader::setUniform1f(const std::string &name, float f)
@@ -115,7 +115,7 @@ void Shader::setUniform1f(const std::string &name, float f)
 	int location = GetUniformLocation(name);
 	if (location == -1)
 		return;
-	GLCall(glUniform1f(location, f));
+	glUniform1f(location, f);
 }
 
 void Shader::setUniform2f(const std::string &name, float f1, float f2)
@@ -123,7 +123,7 @@ void Shader::setUniform2f(const std::string &name, float f1, float f2)
 	int location = GetUniformLocation(name);
 	if (location == -1)
 		return;
-	GLCall(glUniform2f(location, f1, f2));
+	glUniform2f(location, f1, f2);
 }
 
 void Shader::setUniform1i(const std::string &name, int i)
@@ -131,7 +131,7 @@ void Shader::setUniform1i(const std::string &name, int i)
 	int location = GetUniformLocation(name);
 	if (location == -1)
 		return;
-	GLCall(glUniform1i(location, i));
+	glUniform1i(location, i);
 }
 
 void Shader::setUniformMat4f(const std::string &name, const glm::mat4 &matrix)
@@ -139,7 +139,7 @@ void Shader::setUniformMat4f(const std::string &name, const glm::mat4 &matrix)
 	int location = GetUniformLocation(name);
 	if (location == -1)
 		return;
-	GLCall(glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]));
+	glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
 }
 
 int Shader::GetUniformLocation(const std::string &name) const
@@ -147,7 +147,7 @@ int Shader::GetUniformLocation(const std::string &name) const
 	if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
 		return m_UniformLocationCache[name];
 
-	GLCall(int location = glGetUniformLocation(m_RendererID, name.c_str()));
+	int location = glGetUniformLocation(m_RendererID, name.c_str());
 	if (location == -1)
 		std::cout << "Warning, uniform '" << name << "' not found" << std::endl;
 	m_UniformLocationCache[name] = location;

@@ -22,7 +22,7 @@ struct VertexBufferElement
 		case GL_UNSIGNED_BYTE:
 			return 1;
 		}
-		ASSERT(false);
+		assert(false);
 		return 0;
 	}
 };
