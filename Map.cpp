@@ -81,7 +81,7 @@ Map::Map() : m_width(32), m_height(11), m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0
 
     // Sound
     m_Sound.loadAudio("res/audio/jump.ogg", "jump", 0.6f);
-    m_Sound.loadAudio("res/audio/cobblestone_village.ogg", "music", 0.5f, true);
+    m_Sound.streamAudio("res/audio/cobblestone_village.ogg", "music", 0.5f, true);
 }
 
 Map::~Map()

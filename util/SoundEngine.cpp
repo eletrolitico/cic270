@@ -1,8 +1,8 @@
 #include "SoundEngine.h"
+
 #include <iostream>
 #include <signal.h>
-
-#include "stb_vorbis.c"
+#include <cstring>
 
 bool check_al_errors()
 {
@@ -97,6 +97,12 @@ SoundEngine::~SoundEngine()
         alDeleteSources(1, &a.second.source);
         alDeleteBuffers(1, &a.second.buffer);
     }
+    for (auto a : m_StreamMap)
+    {
+        alDeleteSources(1, &a.second.source);
+        alDeleteBuffers(NUM_BUFFERS, a.second.buffers);
+        stb_vorbis_close(a.second.stream);
+    }
     alcMakeContextCurrent(nullptr);
     alcDestroyContext(m_ALContext);
     alcCloseDevice(m_ALDevice);
@@ -157,12 +163,156 @@ bool SoundEngine::loadAudio(const std::string &path, const std::string &name, fl
     return true;
 }
 
+bool SoundEngine::streamAudio(const std::string &path, const std::string &name, float gain, bool repeat)
+{
+    AudioStream &audio = m_StreamMap[name];
+    audio.shouldLoop = repeat;
+
+    int err;
+    audio.stream = stb_vorbis_open_filename(path.c_str(), &err, NULL);
+    if (!audio.stream)
+    {
+        std::cerr << "audio"
+                  << "\"" << name << "\""
+                  << "not found" << std::endl;
+        return false;
+    }
+    audio.info = stb_vorbis_get_info(audio.stream);
+
+    alGenBuffers(NUM_BUFFERS, audio.buffers);
+    check_al_errors();
+
+    if (audio.info.channels == 2)
+        audio.format = AL_FORMAT_STEREO16;
+    else
+        audio.format = AL_FORMAT_MONO16;
+
+    alGenSources(1, &audio.source);
+    check_al_errors();
+    alSourcef(audio.source, AL_GAIN, gain);
+    check_al_errors();
+
+    for (int i = 0; i < NUM_BUFFERS; ++i)
+        if (!fillBuffer(name, audio.buffers[i]))
+            return false;
+
+    alSourceQueueBuffers(audio.source, NUM_BUFFERS, audio.buffers);
+    check_al_errors();
+
+    audio.totalSamplesLeft = stb_vorbis_stream_length_in_samples(audio.stream) * audio.info.channels;
+
+    if (repeat)
+        alSourcePlay(audio.source);
+    return true;
+}
+
 void SoundEngine::playAudio(const std::string &name)
 {
-    alSourcePlay(m_SMap[name].source);
+    auto t = m_SMap.find(name);
+    auto t2 = m_StreamMap.find(name);
+    if (t == m_SMap.end() && t2 == m_StreamMap.end())
+    {
+        std::cout << "Attempted to play non existant audio" << std::endl;
+        return;
+    }
+    if (t == m_SMap.end())
+    {
+        alSourcePlay(m_StreamMap[name].source);
+        check_al_errors();
+    }
+    else
+    {
+        alSourcePlay(m_SMap[name].source);
+        check_al_errors();
+    }
+}
+
+void SoundEngine::stopAudio(const std::string &name)
+{
+    auto t = m_SMap.find(name);
+    auto t2 = m_StreamMap.find(name);
+    if (t == m_SMap.end() && t2 == m_StreamMap.end())
+    {
+        std::cout << "Attempted to stop non existant audio" << std::endl;
+        return;
+    }
+    if (t == m_SMap.end())
+    {
+        alSourceStop(m_StreamMap[name].source);
+        check_al_errors();
+    }
+    else
+    {
+        alSourceStop(m_SMap[name].source);
+        check_al_errors();
+    }
+}
+
+bool SoundEngine::fillBuffer(const std::string &name, int buffer)
+{
+    AudioStream &audio = m_StreamMap[name];
+    ALshort pcm[SBUFFER_SIZE];
+    int size = 0;
+    int result = 0;
+
+    while (size < SBUFFER_SIZE)
+    {
+        result = stb_vorbis_get_samples_short_interleaved(audio.stream, audio.info.channels, pcm + size, SBUFFER_SIZE - size);
+        if (result > 0)
+            size += result * audio.info.channels;
+        else
+            break;
+    }
+
+    if (size == 0)
+        return false;
+
+    alBufferData(buffer, audio.format, pcm, size * sizeof(ALshort), audio.info.sample_rate);
     check_al_errors();
+    audio.totalSamplesLeft -= size;
+
+    return true;
+}
+
+bool SoundEngine::streamUpdate(const std::string &name)
+{
+    AudioStream &audio = m_StreamMap[name];
+
+    ALint processed = 0;
+
+    alGetSourcei(audio.source, AL_BUFFERS_PROCESSED, &processed);
+    check_al_errors();
+
+    while (processed--)
+    {
+        ALuint buffer = 0;
+
+        alSourceUnqueueBuffers(audio.source, 1, &buffer);
+        check_al_errors();
+
+        if (not fillBuffer(name, buffer))
+        {
+            bool shouldExit = true;
+
+            if (audio.shouldLoop)
+            {
+                stb_vorbis_seek_start(audio.stream);
+                audio.totalSamplesLeft = stb_vorbis_stream_length_in_samples(audio.stream) * audio.info.channels;
+                shouldExit = not fillBuffer(name, buffer);
+            }
+
+            if (shouldExit)
+                return false;
+        }
+        alSourceQueueBuffers(audio.source, 1, &buffer);
+        check_al_errors();
+    }
+
+    return true;
 }
 
 void SoundEngine::update()
 {
+    for (auto a : m_StreamMap)
+        streamUpdate(a.first);
 }

@@ -118,4 +118,6 @@ int main(int argc, char **argv)
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
     glutMainLoop();
+
+    return 0;
 }

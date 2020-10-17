@@ -1,9 +1,11 @@
 CC = g++
 
-GLLIBS = -lglut -lGLEW -lGL -lopenal -pthread
+LIBS = -lglut -lGLEW -lGL -lopenal
+FLAGS = -g -Wall
+INCLUDE = -I util -I lib
 
 all: Application.cpp 
-	$(CC) -g -Wall -I util -I lib ./*.cpp ./util/*.cpp -o Application $(GLLIBS)
+	$(CC) $(FLAGS) $(INCLUDE) ./util/*.cpp ./*.cpp  -o Application $(LIBS) -z muldefs
 
 clean:
 	rm -f Application
