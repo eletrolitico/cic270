@@ -192,11 +192,16 @@ bool SoundEngine::streamAudio(const std::string &path, const std::string &name, 
     alSourcef(audio.source, AL_GAIN, gain);
     check_al_errors();
 
-    for (int i = 0; i < NUM_BUFFERS; ++i)
-        if (!fillBuffer(name, audio.buffers[i]))
-            return false;
+    int numBuffers = 0;
 
-    alSourceQueueBuffers(audio.source, NUM_BUFFERS, audio.buffers);
+    for (int i = 0; i < NUM_BUFFERS; ++i)
+        if (fillBuffer(name, audio.buffers[i]))
+            numBuffers++;
+
+    if (numBuffers == 0)
+        return false;
+
+    alSourceQueueBuffers(audio.source, numBuffers, audio.buffers);
     check_al_errors();
 
     audio.totalSamplesLeft = stb_vorbis_stream_length_in_samples(audio.stream) * audio.info.channels;
@@ -208,44 +213,20 @@ bool SoundEngine::streamAudio(const std::string &path, const std::string &name, 
 
 void SoundEngine::playAudio(const std::string &name)
 {
-    auto t = m_SMap.find(name);
-    auto t2 = m_StreamMap.find(name);
-    if (t == m_SMap.end() && t2 == m_StreamMap.end())
-    {
-        std::cout << "Attempted to play non existant audio" << std::endl;
-        return;
-    }
-    if (t == m_SMap.end())
-    {
-        alSourcePlay(m_StreamMap[name].source);
-        check_al_errors();
-    }
-    else
-    {
-        alSourcePlay(m_SMap[name].source);
-        check_al_errors();
-    }
+    alSourcePlay(getSource(name));
+    check_al_errors();
 }
 
 void SoundEngine::stopAudio(const std::string &name)
 {
-    auto t = m_SMap.find(name);
-    auto t2 = m_StreamMap.find(name);
-    if (t == m_SMap.end() && t2 == m_StreamMap.end())
-    {
-        std::cout << "Attempted to stop non existant audio" << std::endl;
-        return;
-    }
-    if (t == m_SMap.end())
-    {
-        alSourceStop(m_StreamMap[name].source);
-        check_al_errors();
-    }
-    else
-    {
-        alSourceStop(m_SMap[name].source);
-        check_al_errors();
-    }
+    alSourceStop(getSource(name));
+    check_al_errors();
+}
+
+void SoundEngine::pauseAudio(const std::string &name)
+{
+    alSourcePause(getSource(name));
+    check_al_errors();
 }
 
 bool SoundEngine::fillBuffer(const std::string &name, int buffer)
@@ -315,4 +296,19 @@ void SoundEngine::update()
 {
     for (auto a : m_StreamMap)
         streamUpdate(a.first);
+}
+
+ALuint SoundEngine::getSource(const std::string &name)
+{
+    auto t = m_SMap.find(name);
+    auto t2 = m_StreamMap.find(name);
+    if (t == m_SMap.end() && t2 == m_StreamMap.end())
+    {
+        std::cout << "Attempted to get non existant audio" << std::endl;
+        return 0;
+    }
+    if (t == m_SMap.end())
+        return m_StreamMap[name].source;
+    else
+        return m_SMap[name].source;
 }

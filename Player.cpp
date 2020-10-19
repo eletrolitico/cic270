@@ -85,7 +85,7 @@ void Player::draw(Renderer r, glm::mat4 mvp)
 }
 
 int accumTime = 0;
-void Player::update(int fElapsedTime, std::string map, int mw, int mh)
+void Player::update(int fElapsedTime, const Map &map)
 {
     float g = 0.001;
     float x = m_PlayerPos.x;
@@ -95,12 +95,8 @@ void Player::update(int fElapsedTime, std::string map, int mw, int mh)
 
     glm::vec2 mv = (float)fElapsedTime * m_PlayerSpeed;
 
-    auto getMap = [&](int x, int y) {
-        return x >= 0 && x < mw && y >= 0 && y < mh ? map[(mh - 1 - y) * mw + x] : '_';
-    };
-
     auto getCollide = [&](float x, float y, glm::vec2 dir) {
-        return x + dir.x > 0 && getMap(x + dir.x, y + dir.y) == '.' && getMap(x + 1 + dir.x, y + 1 + dir.y) == '.' && getMap(x + 1 + dir.x, y + dir.y) == '.' && getMap(x + dir.x, y + 1 + dir.y) == '.';
+        return x + dir.x > 0 && map.getMap(x + dir.x, y + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + 1 + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + dir.y) == '.' && map.getMap(x + dir.x, y + 1 + dir.y) == '.';
     };
 
     if (getCollide(x, y, glm::vec2(0, mv.y)))

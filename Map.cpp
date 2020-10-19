@@ -1,27 +1,15 @@
 #include "Map.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#include <iostream>
 #include "VertexBufferLayout.h"
 
-Map::Map() : m_width(32), m_height(11), m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
+Map::~Map()
+{
+}
+
+Map::Map(std::string map, int w, int h) : m_width(w), m_height(h), m_Map(map)
 {
     int fSize = m_height * m_width * 24;
     float *positions = new float[fSize];
-
-    m_Map = "";
-    m_Map += "................................";
-    m_Map += "................................";
-    m_Map += "................................";
-    m_Map += ".........RTTY...................";
-    m_Map += "................................";
-    m_Map += "..................RTY...........";
-    m_Map += "...........EGD..................";
-    m_Map += "...........LUK..................";
-    m_Map += "EGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGD";
-    m_Map += "LUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUK";
-    m_Map += "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSB";
 
     m_Texture = std::make_unique<Texture>("res/textures/Tilemap.png");
     m_Texture->Unbind();
@@ -72,23 +60,12 @@ Map::Map() : m_width(32), m_height(11), m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0
     // Unbind Vertex Array Object.
     m_VAO->Unbind();
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-
     m_Shader = std::make_unique<Shader>("res/shaders/Tile.shader");
 
     delete positions;
-
-    // Sound
-    m_Sound.loadAudio("res/audio/jump.ogg", "jump", 0.6f);
-    m_Sound.streamAudio("res/audio/cobblestone_village.ogg", "music", 0.5f, true);
 }
 
-Map::~Map()
-{
-}
-
-Tile Map::getTile(char c, int width)
+Tile Map::getTile(char c, int width) const
 {
     switch (c)
     {
@@ -120,73 +97,15 @@ Tile Map::getTile(char c, int width)
     return m_Tiles[0];
 }
 
-void Map::draw(Renderer r)
+void Map::draw(Renderer r, glm::mat4 mvp) const
 {
-    glClearColor(53 / 100.0f, 81 / 100.0f, 92 / 100.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     m_Texture->Bind();
-
-    glm::mat4 mvp = m_Proj * m_View;
     m_Shader->Bind();
     m_Shader->setUniformMat4f("u_MVP", mvp);
     r.Draw(*m_VAO, *m_Shader);
-    mvp = m_Proj * m_View * glm::translate(glm::mat4(1), m_Player.m_PlayerPos);
-    m_Player.draw(r, mvp);
-
-    //glm::mat4 model = glm::translate(glm::mat4(1.0f), m_PlayerPos);
 }
 
-char Map::getMap(int x, int y)
+char Map::getMap(int x, int y) const
 {
-    return m_Map[(m_height - 1 - y) * m_width + x];
-}
-
-float xScreen = 0, yScreen = 0;
-void Map::update(int fElapsedTime)
-{
-
-    if ((m_keys[32] || m_keys['w']))
-    {
-        if (m_Player.m_Ground)
-            m_Sound.playAudio("jump");
-        m_Player.jump();
-    }
-    if (m_keys['d'])
-        m_Player.moveRight();
-    else if (m_keys['a'])
-        m_Player.moveLeft();
-    else
-        m_Player.stop();
-
-    m_Player.update(fElapsedTime, m_Map, m_width, m_height);
-
-    if (m_Player.m_PlayerPos.x - xScreen > 7)
-        xScreen = m_Player.m_PlayerPos.x - 7;
-    if (m_Player.m_PlayerPos.x - xScreen < 1.6)
-        xScreen = m_Player.m_PlayerPos.x - 1.6;
-
-    if (xScreen < 0)
-        xScreen = 0;
-
-    if (xScreen > m_width - 16)
-        xScreen = m_width - 16;
-
-    yScreen = m_Player.m_PlayerPos.y - 6.5;
-
-    if (yScreen < 0)
-        yScreen = 0;
-
-    m_View = glm::translate(glm::mat4(1), glm::vec3(-xScreen, -yScreen, 0));
-    m_Sound.update();
-}
-
-void Map::keyboardDown(unsigned char key, int x, int y)
-{
-    m_keys[key] = true;
-}
-
-void Map::keyboardUp(unsigned char key, int x, int y)
-{
-    m_keys[key] = false;
+    return x >= 0 && x < m_width && y >= 0 && y < m_height ? m_Map[(m_height - 1 - y) * m_width + x] : '_';
 }

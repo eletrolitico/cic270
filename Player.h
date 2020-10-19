@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "Texture.h"
+#include "Map.h"
 
 class Player
 {
@@ -27,7 +28,7 @@ public:
 
     Player();
     ~Player();
-    void update(int fElapsedTime, std::string map, int mw, int mh);
+    void update(int fElapsedTime, const Map &map);
     void moveLeft();
     void moveRight();
     void stop();

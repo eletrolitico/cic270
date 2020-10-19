@@ -9,7 +9,7 @@
 #include "stb_image.h"
 
 #include "Renderer.h"
-#include "Map.h"
+#include "Game.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
@@ -18,12 +18,12 @@ int win_height = 720;
 
 Renderer renderer;
 
-Map *map;
+Game *game;
 
 void display()
 {
 
-    map->draw(renderer);
+    game->draw(renderer);
 
     glutSwapBuffers();
 }
@@ -33,6 +33,7 @@ void reshape(int width, int height)
     win_width = width;
     win_height = height;
     glViewport(0, 0, width, height);
+    game->reshape(width, height);
     glutPostRedisplay();
 }
 
@@ -46,12 +47,12 @@ void keyboard(unsigned char key, int x, int y)
     case 'Q':
         exit(0);
     }
-    map->keyboardDown(key, x, y);
+    game->keyboardDown(key, x, y);
 }
 
 void keyUp(unsigned char key, int x, int y)
 {
-    map->keyboardUp(key, x, y);
+    game->keyboardUp(key, x, y);
 }
 
 void SpecialInput(int key, int x, int y)
@@ -82,7 +83,7 @@ void idleFunc()
         sprintf(msg, "fps: %.3f", fps);
         glutSetWindowTitle(msg);
     }
-    map->update(elapsedTime - lastTime);
+    game->update(elapsedTime - lastTime);
     lastTime = elapsedTime;
     glutPostRedisplay();
 }
@@ -107,7 +108,10 @@ int main(int argc, char **argv)
     glEnable(GL_KHR_debug);
     glDebugMessageCallback(messageCallback, NULL);
 
-    map = new Map();
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+
+    game = new Game();
 
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);

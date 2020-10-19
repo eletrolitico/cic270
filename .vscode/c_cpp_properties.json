@@ -1,6 +1,7 @@
 {
     "configurations": [
         {
+            "name": "Application",
             "includePath": [
                 "./lib",
                 "./util"

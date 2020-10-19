@@ -48,6 +48,7 @@ public:
     bool loadAudio(const std::string &path, const std::string &name, float gain = 1.0f, bool repeat = false);
     void playAudio(const std::string &name);
     void stopAudio(const std::string &name);
+    void pauseAudio(const std::string &name);
     bool streamAudio(const std::string &path, const std::string &name, float gain = 1.0f, bool repeat = true);
     void update();
 
@@ -59,6 +60,7 @@ private:
 
     bool fillBuffer(const std::string &name, int buffer);
     bool streamUpdate(const std::string &name);
+    ALuint getSource(const std::string &name);
 };
 
 #endif

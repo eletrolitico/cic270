@@ -64,6 +64,10 @@
         "valarray": "cpp",
         "variant": "cpp",
         "chrono": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "bitset": "cpp",
+        "unordered_set": "cpp"
     }
 }
