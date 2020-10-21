@@ -1,12 +1,11 @@
 # Name of the project
 PROJ_NAME=Application
 
-# .c files
-#C_SOURCE=$(wildcard ./*.cpp)
-SOURCES := $(shell find . -name '*.cpp')
+# .cpp files
+#SOURCES := $(shell find . -name '*.cpp')
+SOURCES := $(wildcard *.cpp) $(wildcard **/*.cpp)
 
 # Object files
-#OBJ=$(subst .cpp,.o,$(subst ./objects/,$(C_SOURCE)))
 OBJ=$(addprefix objects/,$(subst .cpp,.o,$(notdir $(SOURCES))))
 
 # Compiler and linker
@@ -35,12 +34,6 @@ objects/%.o: ./%.cpp
 	$(CC) $< $(CC_FLAGS) -o $@
 	@ echo ' '
 objects/%.o: ./util/%.cpp
-	@ echo 'Building target using GCC compiler: $<'
-	$(CC) $< $(CC_FLAGS) -o $@
-	@ echo ' '
-	
-
-objects/Application.o: ./Application.cpp
 	@ echo 'Building target using GCC compiler: $<'
 	$(CC) $< $(CC_FLAGS) -o $@
 	@ echo ' '
