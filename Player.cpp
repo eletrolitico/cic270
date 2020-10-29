@@ -84,10 +84,11 @@ void Player::draw(Renderer r, glm::mat4 mvp)
     r.Draw(*m_VAO, *m_Shader);
 }
 
-int accumTime = 0;
-void Player::update(int fElapsedTime, const Map &map)
+float accumTime = 0.0f;
+void Player::update(int elapsedTime, const Map &map)
 {
-    float g = 0.001;
+    float fElapsedTime = (float)elapsedTime / 1000.0f;
+    float g = 50 * fElapsedTime;
     float x = m_PlayerPos.x;
     float y = m_PlayerPos.y;
 
@@ -138,7 +139,7 @@ void Player::update(int fElapsedTime, const Map &map)
 
     accumTime += fElapsedTime;
 
-    if (accumTime > 100)
+    if (accumTime > 0.1)
     {
         accumTime = 0;
         m_Frame++;
@@ -163,16 +164,16 @@ void Player::update(int fElapsedTime, const Map &map)
 
 void Player::moveLeft()
 {
-    if (m_PlayerSpeed.x > -0.01)
-        m_PlayerSpeed.x -= 0.001;
+    if (m_PlayerSpeed.x > -10)
+        m_PlayerSpeed.x -= 1;
     m_State = 1;
     m_Mirror = true;
 }
 
 void Player::moveRight()
 {
-    if (m_PlayerSpeed.x < 0.01)
-        m_PlayerSpeed.x += 0.001;
+    if (m_PlayerSpeed.x < 10)
+        m_PlayerSpeed.x += 1;
     m_State = 1;
     m_Mirror = false;
 }
@@ -180,11 +181,11 @@ void Player::moveRight()
 void Player::stop()
 {
     if (m_PlayerSpeed.x > 0)
-        m_PlayerSpeed.x -= 0.001;
+        m_PlayerSpeed.x -= 1;
     else
-        m_PlayerSpeed.x += 0.001;
+        m_PlayerSpeed.x += 1;
 
-    if (abs(m_PlayerSpeed.x) < 0.005)
+    if (abs(m_PlayerSpeed.x) < 5)
         m_PlayerSpeed.x = 0;
     m_State = 0;
 }
@@ -193,7 +194,7 @@ void Player::jump()
 {
     if (m_Ground)
     {
-        m_PlayerSpeed.y += 0.02;
+        m_PlayerSpeed.y += 15;
         m_Frame = 0;
     }
 }

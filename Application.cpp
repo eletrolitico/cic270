@@ -55,19 +55,6 @@ void keyUp(unsigned char key, int x, int y)
     game->keyboardUp(key, x, y);
 }
 
-void SpecialInput(int key, int x, int y)
-{
-    switch (key)
-    {
-    case GLUT_KEY_UP:
-        break;
-    case GLUT_KEY_DOWN:
-        break;
-    }
-
-    glutPostRedisplay();
-}
-
 int frame = 0, elapsedTime, timebase = 0, lastTime = 0;
 void idleFunc()
 {
@@ -83,7 +70,8 @@ void idleFunc()
         sprintf(msg, "fps: %.3f", fps);
         glutSetWindowTitle(msg);
     }
-    game->update(elapsedTime - lastTime);
+    if (elapsedTime - lastTime > 0)
+        game->update(elapsedTime - lastTime);
     lastTime = elapsedTime;
     glutPostRedisplay();
 }
@@ -117,7 +105,6 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyUp);
-    glutSpecialFunc(SpecialInput);
     glutIdleFunc(idleFunc);
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
