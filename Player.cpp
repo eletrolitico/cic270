@@ -194,7 +194,7 @@ void Player::jump()
 {
     if (m_Ground)
     {
-        m_PlayerSpeed.y += 15;
+        m_PlayerSpeed.y += sqrt(2 * 50 * 3.5);
         m_Frame = 0;
     }
 }

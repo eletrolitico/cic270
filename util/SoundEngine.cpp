@@ -4,6 +4,8 @@
 #include <signal.h>
 #include <cstring>
 
+#include "stb_vorbis.c"
+
 bool check_al_errors()
 {
     ALenum error = alGetError();
@@ -177,12 +179,11 @@ bool SoundEngine::streamAudio(const std::string &path, const std::string &name, 
                   << "not found" << std::endl;
         return false;
     }
-    audio.info = stb_vorbis_get_info(audio.stream);
 
     alGenBuffers(NUM_BUFFERS, audio.buffers);
     check_al_errors();
 
-    if (audio.info.channels == 2)
+    if (audio.stream->channels == 2)
         audio.format = AL_FORMAT_STEREO16;
     else
         audio.format = AL_FORMAT_MONO16;
@@ -204,7 +205,7 @@ bool SoundEngine::streamAudio(const std::string &path, const std::string &name, 
     alSourceQueueBuffers(audio.source, numBuffers, audio.buffers);
     check_al_errors();
 
-    audio.totalSamplesLeft = stb_vorbis_stream_length_in_samples(audio.stream) * audio.info.channels;
+    audio.totalSamplesLeft = stb_vorbis_stream_length_in_samples(audio.stream) * audio.stream->channels;
 
     if (repeat)
         alSourcePlay(audio.source);
@@ -238,9 +239,9 @@ bool SoundEngine::fillBuffer(const std::string &name, int buffer)
 
     while (size < SBUFFER_SIZE)
     {
-        result = stb_vorbis_get_samples_short_interleaved(audio.stream, audio.info.channels, pcm + size, SBUFFER_SIZE - size);
+        result = stb_vorbis_get_samples_short_interleaved(audio.stream, audio.stream->channels, pcm + size, SBUFFER_SIZE - size);
         if (result > 0)
-            size += result * audio.info.channels;
+            size += result * audio.stream->channels;
         else
             break;
     }
@@ -248,7 +249,7 @@ bool SoundEngine::fillBuffer(const std::string &name, int buffer)
     if (size == 0)
         return false;
 
-    alBufferData(buffer, audio.format, pcm, size * sizeof(ALshort), audio.info.sample_rate);
+    alBufferData(buffer, audio.format, pcm, size * sizeof(ALshort), audio.stream->sample_rate);
     check_al_errors();
     audio.totalSamplesLeft -= size;
 
@@ -278,7 +279,7 @@ bool SoundEngine::streamUpdate(const std::string &name)
             if (audio.shouldLoop)
             {
                 stb_vorbis_seek_start(audio.stream);
-                audio.totalSamplesLeft = stb_vorbis_stream_length_in_samples(audio.stream) * audio.info.channels;
+                audio.totalSamplesLeft = stb_vorbis_stream_length_in_samples(audio.stream) * audio.stream->channels;
                 shouldExit = not fillBuffer(name, buffer);
             }
 

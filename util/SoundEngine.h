@@ -7,14 +7,14 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-#include "stb_vorbis.c"
-
 #ifndef NUM_BUFFERS
 #define NUM_BUFFERS 4
 #endif
 
 #ifndef SBUFFER_SIZE
 #define SBUFFER_SIZE 1024 * 32
+
+typedef struct stb_vorbis stb_vorbis;
 
 typedef struct
 {
@@ -28,7 +28,6 @@ typedef struct
     ALuint ID;
 
     stb_vorbis *stream;
-    stb_vorbis_info info;
 
     ALuint buffers[NUM_BUFFERS];
     ALuint source;

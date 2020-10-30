@@ -4,6 +4,7 @@ PROJ_NAME=Application
 # .cpp files
 #SOURCES := $(shell find . -name '*.cpp')
 SOURCES := $(wildcard *.cpp) $(wildcard **/*.cpp)
+HEADERS := $(wildcard *.h) $(wildcard **/*.h)
 
 # Object files
 OBJ=$(addprefix objects/,$(subst .cpp,.o,$(notdir $(SOURCES))))
@@ -14,16 +15,16 @@ CC=g++
 # Flags for compiler
 CC_FLAGS = -g -c -Wall -I ./util -I ./lib
 
-LDFLAGS = -lglut -lGLEW -lGL -lopenal -z muldefs
+LDFLAGS = -lglut -lGLEW -lGL -lopenal
 
 # Command used at clean target
 RM = rm -rf
 
 # Compilation and linking
-all: objFolder $(PROJ_NAME) 
+all: objFolder $(PROJ_NAME)
 	@ echo 'Done!'
 
-$(PROJ_NAME): $(OBJ)
+$(PROJ_NAME): $(OBJ) 
 	@ echo 'Building binary using GCC linker: $@'
 	$(CC) $^ -o $@ $(LDFLAGS)
 	@ echo 'Finished building binary: $@'
