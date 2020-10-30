@@ -75,7 +75,7 @@ void Player::draw(Renderer r, glm::mat4 mvp)
     m_Shader->Bind();
     m_Texture->Bind();
     m_Shader->setUniformMat4f("u_MVP", mvp);
-    m_Shader->setUniform1i("u_State", 2 - m_State);
+    m_Shader->setUniform1i("u_State", 3 - m_State);
     m_Shader->setUniform1i("u_Frame", m_Frame);
     m_Shader->setUniform1f("u_OffsetX", ts / m_Texture->GetWidth());
     m_Shader->setUniform1f("u_OffsetY", ts / m_Texture->GetHeight());
@@ -92,51 +92,63 @@ void Player::update(int elapsedTime, const Map &map)
     float x = m_PlayerPos.x;
     float y = m_PlayerPos.y;
 
-    m_PlayerSpeed.y -= g;
-
-    glm::vec2 mv = (float)fElapsedTime * m_PlayerSpeed;
-
-    auto getCollide = [&](float x, float y, glm::vec2 dir) {
-        return x + dir.x > 0 && map.getMap(x + dir.x, y + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + 1 + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + dir.y) == '.' && map.getMap(x + dir.x, y + 1 + dir.y) == '.';
-    };
-
-    if (getCollide(x, y, glm::vec2(0, mv.y)))
+    if (m_State != 3)
     {
-        m_PlayerPos.y += mv.y;
-        m_Ground = false;
-    }
-    else
-    {
-        if (mv.y < 0)
-            m_Ground = true;
-        else
+
+        m_PlayerSpeed.y -= g;
+
+        glm::vec2 mv = (float)fElapsedTime * m_PlayerSpeed;
+
+        auto getCollide = [&](float x, float y, glm::vec2 dir) {
+            return x + dir.x > 0 && map.getMap(x + dir.x, y + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + 1 + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + dir.y) == '.' && map.getMap(x + dir.x, y + 1 + dir.y) == '.';
+        };
+
+        if (getCollide(x, y, glm::vec2(0, mv.y)))
+        {
+            m_PlayerPos.y += mv.y;
             m_Ground = false;
-        m_PlayerSpeed.y = 0;
-
-        if (mv.y > 0)
-            m_PlayerPos.y = floor(y) + 0.999f;
+        }
         else
-            m_PlayerPos.y = floor(y);
-    }
+        {
+            if (mv.y < 0)
+                m_Ground = true;
+            else
+                m_Ground = false;
+            m_PlayerSpeed.y = 0;
 
-    y = m_PlayerPos.y;
+            if (mv.y > 0)
+                m_PlayerPos.y = floor(y) + 0.999f;
+            else
+                m_PlayerPos.y = floor(y);
 
-    if (getCollide(x, y, glm::vec2(mv.x, 0)))
-    {
-        m_PlayerPos.x += mv.x;
-    }
-    else
-    {
-        m_PlayerSpeed.x = 0;
-        if (mv.x > 0)
-            m_PlayerPos.x = floor(x) + 0.999f;
+            auto dd = map.getDanger();
+            if (dd.find(map.getMap(x, (int)m_PlayerPos.y - 1)) != dd.end())
+            {
+                m_State = 3;
+                m_PlayerSpeed = {0.0f, 0.0f};
+                goto end;
+            }
+        }
+
+        y = m_PlayerPos.y;
+
+        if (getCollide(x, y, glm::vec2(mv.x, 0)))
+        {
+            m_PlayerPos.x += mv.x;
+        }
         else
-            m_PlayerPos.x = floor(x) + 0.01f;
+        {
+            m_PlayerSpeed.x = 0;
+            if (mv.x > 0)
+                m_PlayerPos.x = floor(x) + 0.999f;
+            else
+                m_PlayerPos.x = floor(x) + 0.01f;
+        }
+
+        if (!m_Ground)
+            m_State = 2;
     }
-
-    if (!m_Ground)
-        m_State = 2;
-
+end:
     accumTime += fElapsedTime;
 
     if (accumTime > 0.1)
@@ -157,6 +169,10 @@ void Player::update(int elapsedTime, const Map &map)
         break;
     case 2:
         if (m_Frame > 7)
+            m_Frame = 0;
+        break;
+    case 3:
+        if (m_Frame > 3)
             m_Frame = 0;
         break;
     }

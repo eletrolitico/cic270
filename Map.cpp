@@ -6,7 +6,7 @@ Map::~Map()
 {
 }
 
-Map::Map(std::string map, int w, int h) : m_width(w), m_height(h), m_Map(map)
+Map::Map(std::string map, int w, int h, int iniX, int iniY) : m_width(w), m_height(h), m_Map(map), m_InitialPos({iniX, iniY, 0.0f})
 {
     int fSize = m_height * m_width * 24;
     float *positions = new float[fSize];
@@ -93,6 +93,8 @@ Tile Map::getTile(char c, int width) const
         return m_Tiles[3 * width + 2];
     case 'B':
         return m_Tiles[3 * width + 3];
+    case 'O':
+        return m_Tiles[4];
     }
     return m_Tiles[0];
 }
@@ -108,4 +110,14 @@ void Map::draw(Renderer r, glm::mat4 mvp) const
 char Map::getMap(int x, int y) const
 {
     return x >= 0 && x < m_width && y >= 0 && y < m_height ? m_Map[(m_height - 1 - y) * m_width + x] : '_';
+}
+
+std::set<char> Map::getDanger() const
+{
+    return {'O'};
+}
+
+glm::vec3 Map::getInitialPos() const
+{
+    return m_InitialPos;
 }

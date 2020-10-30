@@ -6,6 +6,20 @@
 
 Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
 {
+
+    //R grama flutuante esquerda
+    //T grama flutuante meio
+    //Y grama flutuante direita
+    //E grama esquerda
+    //G grama meio
+    //D grama direita
+    //L terra esquerda
+    //U terra meio
+    //K terra direita
+    //A fundo esquerda
+    //S fundo meio
+    //B fundo direita
+    //O espinho
     std::string tmp;
     tmp = "";
     tmp += "................................";
@@ -15,14 +29,15 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     tmp += "................................";
     tmp += "..................RTY...........";
     tmp += "...........EGD..................";
-    tmp += "...........LUK..................";
+    tmp += "...........LUK.............OOO..";
     tmp += "EGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGD";
     tmp += "LUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUK";
     tmp += "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSB";
-    m_Map = std::make_unique<Map>(tmp, 32, 11);
+    m_Map = std::make_unique<Map>(tmp, 32, 11, 2, 7);
     // Sound
     m_Sound.loadAudio("res/audio/jump.ogg", "jump", 0.6f, false);
-    m_Sound.streamAudio("res/audio/cobblestone_village.ogg", "music", 0.5f, true);
+    m_Sound.loadAudio("res/audio/morte.ogg", "death", 0.6f, false);
+    m_Sound.streamAudio("res/audio/cobblestone_village.ogg", "music", 0.4f, true);
 }
 
 Game::~Game()
@@ -43,18 +58,37 @@ float xScreen = 0, yScreen = 0;
 void Game::update(int fElapsedTime)
 {
 
-    if ((m_keys[32] || m_keys['w']))
+    // if not dead
+    if (m_Player.m_State != 3)
     {
-        if (m_Player.m_Ground)
-            m_Sound.playAudio("jump");
-        m_Player.jump();
+        if ((m_keys[32] || m_keys['w']))
+        {
+            if (m_Player.m_Ground)
+                m_Sound.playAudio("jump");
+            m_Player.jump();
+        }
+        if (m_keys['d'])
+            m_Player.moveRight();
+        else if (m_keys['a'])
+            m_Player.moveLeft();
+        else
+            m_Player.stop();
     }
-    if (m_keys['d'])
-        m_Player.moveRight();
-    else if (m_keys['a'])
-        m_Player.moveLeft();
-    else
-        m_Player.stop();
+
+    if (m_keys[13] && m_Player.m_State == 3)
+    {
+        m_Player.m_State = 0;
+        m_Player.m_PlayerPos = m_Map->getInitialPos();
+        m_Sound.playAudio("music");
+    }
+
+    static int prevState = 0;
+    if (m_Player.m_State == 3 && prevState != 3)
+    {
+        m_Sound.pauseAudio("music");
+        m_Sound.playAudio("death");
+    }
+    prevState = m_Player.m_State;
 
     static bool music = true;
     static bool keyPrev = false;

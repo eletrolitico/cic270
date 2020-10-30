@@ -17,14 +17,14 @@ private:
     std::unique_ptr<Texture> m_Texture;
     bool m_Mirror = false;
 
-    // 0=idle 1=walking 2=jumping
-    int m_State = 0;
     int m_Frame = 0;
 
 public:
     glm::vec3 m_PlayerPos;
     glm::vec2 m_PlayerSpeed;
     bool m_Ground = false;
+    // 0=idle 1=walking 2=jumping, 3 = dead
+    int m_State = 0;
 
     Player();
     ~Player();
