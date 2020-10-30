@@ -15,7 +15,11 @@ CC=g++
 # Flags for compiler
 CC_FLAGS = -g -c -Wall -I ./util -I ./lib
 
-LDFLAGS = -lglut -lGLEW -lGL -lopenal
+ifeq ($(OS),Windows_NT)
+  LDFLAGS = -lfreeglut -lGLEW32 -lopengl32 -lopenal
+else
+  LDFLAGS = -lglut -lGLEW -lGL -lopenal
+endif
 
 # Command used at clean target
 RM = rm -rf
