@@ -19,7 +19,7 @@ private:
     std::unique_ptr<Map> m_Map;
     Player m_Player;
 
-    SoundEngine m_Sound;
+    SoundEngine *m_Sound;
 
     Tile getTile(char, int);
 

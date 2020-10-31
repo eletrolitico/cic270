@@ -122,7 +122,7 @@ void Player::update(int elapsedTime, const Map &map)
                 m_PlayerPos.y = floor(y);
 
             auto dd = map.getDanger();
-            if (dd.find(map.getMap(x, (int)m_PlayerPos.y - 1)) != dd.end())
+            if (dd.find(map.getMap(x, (int)m_PlayerPos.y - 1)) != dd.end() || dd.find(map.getMap(x + 1, (int)m_PlayerPos.y - 1)) != dd.end())
             {
                 m_State = 3;
                 m_PlayerSpeed = {0.0f, 0.0f};

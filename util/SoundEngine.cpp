@@ -1,8 +1,15 @@
 #include "SoundEngine.h"
 
 #include <iostream>
-#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <cstring>
+
+#ifdef WIN32
+#include <debugapi.h>
+#else
+#include <signal.h>
+#endif
 
 #include "stb_vorbis.c"
 
@@ -33,7 +40,11 @@ bool check_al_errors()
             std::cerr << "UNKNOWN AL ERROR: " << error;
         }
         std::cerr << std::endl;
+#ifdef WIN32
+        DebugBreak();
+#else
         raise(SIGTRAP);
+#endif
         return false;
     }
     return true;
@@ -66,10 +77,25 @@ bool check_alc_errors(ALCdevice *device)
             std::cerr << "UNKNOWN ALC ERROR: " << error;
         }
         std::cerr << std::endl;
+#ifdef WIN32
+        DebugBreak();
+#else
         raise(SIGTRAP);
+#endif
         return false;
     }
     return true;
+}
+
+SoundEngine *SoundEngine::instance = nullptr;
+
+SoundEngine *SoundEngine::GetInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new SoundEngine();
+    }
+    return instance;
 }
 
 SoundEngine::SoundEngine()
@@ -78,7 +104,11 @@ SoundEngine::SoundEngine()
     if (!m_ALDevice)
     {
         std::cerr << "Failed to open audio device" << std::endl;
+#ifdef WIN32
+        DebugBreak();
+#else
         raise(SIGTRAP);
+#endif
     }
 
     m_ALContext = alcCreateContext(m_ALDevice, nullptr);
@@ -87,7 +117,11 @@ SoundEngine::SoundEngine()
     if (!alcMakeContextCurrent(m_ALContext))
     {
         std::cerr << "Error making context current" << std::endl;
+#ifdef WIN32
+        DebugBreak();
+#else
         raise(SIGTRAP);
+#endif
     }
     check_alc_errors(m_ALDevice);
 }

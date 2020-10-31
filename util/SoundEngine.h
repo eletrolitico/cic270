@@ -42,8 +42,10 @@ typedef struct
 class SoundEngine
 {
 public:
-    SoundEngine();
-    ~SoundEngine();
+    SoundEngine(SoundEngine &other) = delete;
+    void operator=(const SoundEngine &) = delete;
+    static SoundEngine *GetInstance();
+
     bool loadAudio(const std::string &path, const std::string &name, float gain = 1.0f, bool repeat = false);
     void playAudio(const std::string &name);
     void stopAudio(const std::string &name);
@@ -52,6 +54,10 @@ public:
     void update();
 
 private:
+    SoundEngine();
+    ~SoundEngine();
+    static SoundEngine *instance;
+
     ALCdevice *m_ALDevice;
     ALCcontext *m_ALContext;
     std::unordered_map<std::string, AudioSrc> m_SMap;

@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <iostream>
+#ifndef WIN32
 #include <signal.h>
+#endif
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
@@ -79,7 +79,11 @@ void idleFunc()
 void messageCallback(GLenum source​, GLenum type​, GLuint id​, GLenum severity​, GLsizei length​, const GLchar *message​, const void *userParam​)
 {
     std::cout << source​ << type​ << id​ << severity​ << message​ << std::endl;
+#ifdef WIN32
+    DebugBreak();
+#else
     raise(SIGTRAP);
+#endif
 }
 
 int main(int argc, char **argv)
