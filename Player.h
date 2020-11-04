@@ -23,7 +23,7 @@ public:
     glm::vec3 m_PlayerPos;
     glm::vec2 m_PlayerSpeed;
     bool m_Ground = false;
-    // 0=idle 1=walking 2=jumping, 3 = dead
+    // 0=idle 1=walking 2=jumping, 3 = dead, 4 = next stage
     int m_State = 0;
 
     Player();

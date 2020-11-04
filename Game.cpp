@@ -20,29 +20,54 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     //S fundo meio
     //B fundo direita
     //O espinho
-    std::string tmp;
+    //P espinho com back
+    //F fim do mapa
+    //H Tijolo
+    //W parede
+    std::string tmp = "";
+    tmp += "................................";
+    tmp += "...............................W";
+    tmp += "..............................WW";
+    tmp += ".........RTTY.................WW";
+    tmp += "..............................WW";
+    tmp += "..................RTY.........WW";
+    tmp += "...........EGD................WW";
+    tmp += "...........LUK...........OOO..WW";
+    tmp += "EGGGGGGGGGGGGGGGGGGGGGGGGGGGGGHF";
+    tmp += "LUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU";
+    tmp += "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS";
+    m_Map.push_back(new Map(tmp, 32, 11, 2, 3));
+    m_Player.m_PlayerPos = {2, 3, 0};
+
     tmp = "";
-    tmp += "................................";
-    tmp += "................................";
-    tmp += "................................";
-    tmp += ".........RTTY...................";
-    tmp += "................................";
-    tmp += "..................RTY...........";
-    tmp += "...........EGD..................";
-    tmp += "...........LUK.............OOO..";
-    tmp += "EGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGD";
-    tmp += "LUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUK";
-    tmp += "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSB";
-    m_Map = std::make_unique<Map>(tmp, 32, 11, 2, 7);
+    tmp += "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH";
+    tmp += "HHHHHWWWWWWWWWWWWWWWWWWWWWWWWHHH";
+    tmp += "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWWHWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWHHWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWPPWWWWHHHWPPPPWWWWWWWWWWWWW";
+    tmp += "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH";
+    tmp += "UUUHHHUUUUHHHHHHUUUUUUHHHHHHUUUU";
+    tmp += "SSSSSSSSSSSSSSHHSSSSSSSSSSSSSSSS";
+    m_Map.push_back(new Map(tmp, 32, 11, 2, 3));
+
+    m_MapCount = 2;
+
     // Sound
     m_Sound = SoundEngine::GetInstance();
     m_Sound->loadAudio("res/audio/jump.ogg", "jump", 0.6f, false);
-    m_Sound->loadAudio("res/audio/morte.ogg", "death", 0.6f, false);
-    m_Sound->streamAudio("res/audio/cobblestone_village.ogg", "music", 0.4f, true);
+    m_Sound->loadAudio("res/audio/morte.ogg", "death", 0.8f, false);
+    m_Sound->streamAudio("res/audio/cobblestone_village.ogg", "music", 0.1f, true);
 }
 
 Game::~Game()
 {
+    for (auto m : m_Map)
+    {
+        delete m;
+    }
 }
 
 void Game::draw(Renderer r)
@@ -51,14 +76,26 @@ void Game::draw(Renderer r)
     glClear(GL_COLOR_BUFFER_BIT);
 
     glm::mat4 mvp = m_Proj * m_View;
-    m_Map->draw(r, mvp);
+    m_Map[m_CurrentMap]->draw(r, mvp);
     m_Player.draw(r, mvp * glm::translate(glm::mat4(1), m_Player.m_PlayerPos));
 }
 
-float xScreen = 0, yScreen = 0;
 void Game::update(int fElapsedTime)
 {
-
+    if (m_Player.m_State == 4)
+    {
+        m_CurrentMap++;
+        if (m_CurrentMap < m_MapCount)
+        {
+            m_Player.m_PlayerPos = m_Map[m_CurrentMap]->getInitialPos();
+            m_Player.m_State = 0;
+        }
+        else
+        {
+            //you win
+            m_Sound->playAudio("jump");
+        }
+    }
     // if not dead
     if (m_Player.m_State != 3)
     {
@@ -80,7 +117,7 @@ void Game::update(int fElapsedTime)
     if (m_keys[13] && m_Player.m_State == 3)
     {
         m_Player.m_State = 0;
-        m_Player.m_PlayerPos = m_Map->getInitialPos();
+        m_Player.m_PlayerPos = m_Map[m_CurrentMap]->getInitialPos();
         if (!music)
         {
             music = true;
@@ -108,8 +145,7 @@ void Game::update(int fElapsedTime)
     }
     keyPrev = m_keys['m'];
 
-    
-    m_Player.update(fElapsedTime, *m_Map);
+    m_Player.update(fElapsedTime, *m_Map[m_CurrentMap]);
 
     if (m_Player.m_PlayerPos.x - xScreen > 7)
         xScreen = m_Player.m_PlayerPos.x - 7;
@@ -119,13 +155,16 @@ void Game::update(int fElapsedTime)
     if (xScreen < 0)
         xScreen = 0;
 
-    if (xScreen > m_Map->m_width - 16)
-        xScreen = m_Map->m_width - 16;
+    if (xScreen > m_Map[m_CurrentMap]->m_width - 16)
+        xScreen = m_Map[m_CurrentMap]->m_width - 16;
 
     yScreen = m_Player.m_PlayerPos.y - 6.5;
 
     if (yScreen < 0)
         yScreen = 0;
+
+    if (yScreen > m_Map[m_CurrentMap]->m_height - 9)
+        yScreen = m_Map[m_CurrentMap]->m_height - 9;
 
     m_View = glm::translate(glm::mat4(1), glm::vec3(-xScreen, -yScreen, 0));
     m_Sound->update();

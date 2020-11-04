@@ -2,7 +2,6 @@
 #define GAME
 
 #include <vector>
-#include <memory>
 #include <map>
 
 #include "Renderer.h"
@@ -12,16 +11,6 @@
 
 class Game
 {
-private:
-    glm::mat4 m_Proj, m_View;
-
-    std::map<char, bool> m_keys;
-    std::unique_ptr<Map> m_Map;
-    Player m_Player;
-
-    SoundEngine *m_Sound;
-
-    Tile getTile(char, int);
 
 public:
     Game();
@@ -32,6 +21,20 @@ public:
     void keyboardDown(unsigned char key, int x, int y);
     void keyboardUp(unsigned char key, int x, int y);
     void reshape(int width, int height);
+
+private:
+    glm::mat4 m_Proj, m_View;
+    float xScreen = 0, yScreen = 0;
+
+    std::map<char, bool> m_keys;
+    std::vector<Map *> m_Map;
+    int m_CurrentMap = 0;
+    int m_MapCount;
+    Player m_Player;
+
+    SoundEngine *m_Sound;
+
+    Tile getTile(char, int);
 };
 
 #endif

@@ -62,7 +62,12 @@ Map::Map(std::string map, int w, int h, int iniX, int iniY) : m_width(w), m_heig
 
     m_Shader = std::make_unique<Shader>("res/shaders/Tile.shader");
 
-    delete positions;
+    for (int i = 0; i < 256; ++i)
+        m_Transparent[i] = false;
+    m_Transparent['.'] = true;
+    m_Transparent['W'] = true;
+
+    delete[] positions;
 }
 
 Tile Map::getTile(char c, int width) const
@@ -95,6 +100,14 @@ Tile Map::getTile(char c, int width) const
         return m_Tiles[3 * width + 3];
     case 'O':
         return m_Tiles[4];
+    case 'F':
+        return m_Tiles[5];
+    case 'H':
+        return m_Tiles[6];
+    case 'W':
+        return m_Tiles[7];
+    case 'P':
+        return m_Tiles[8];
     }
     return m_Tiles[0];
 }
@@ -114,10 +127,19 @@ char Map::getMap(int x, int y) const
 
 std::set<char> Map::getDanger() const
 {
-    return {'O'};
+    return {'O', 'P'};
 }
 
 glm::vec3 Map::getInitialPos() const
 {
     return m_InitialPos;
+}
+
+bool Map::getCollide(float x, float y, glm::vec2 dir) const
+{
+    bool c1 = m_Transparent[(int)getMap(x + 0.25f + dir.x, y + 0 + dir.y)];
+    bool c4 = m_Transparent[(int)getMap(x + 0.25f + dir.x, y + 1 + dir.y)];
+    bool c3 = m_Transparent[(int)getMap(x + 0.75f + dir.x, y + 0 + dir.y)];
+    bool c2 = m_Transparent[(int)getMap(x + 0.75f + dir.x, y + 1 + dir.y)];
+    return x + dir.x > -0.25f && c1 && c2 && c3 && c4;
 }

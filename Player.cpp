@@ -99,11 +99,7 @@ void Player::update(int elapsedTime, const Map &map)
 
         glm::vec2 mv = (float)fElapsedTime * m_PlayerSpeed;
 
-        auto getCollide = [&](float x, float y, glm::vec2 dir) {
-            return x + dir.x > 0 && map.getMap(x + dir.x, y + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + 1 + dir.y) == '.' && map.getMap(x + 1 + dir.x, y + dir.y) == '.' && map.getMap(x + dir.x, y + 1 + dir.y) == '.';
-        };
-
-        if (getCollide(x, y, glm::vec2(0, mv.y)))
+        if (map.getCollide(x, y, glm::vec2(0, mv.y)))
         {
             m_PlayerPos.y += mv.y;
             m_Ground = false;
@@ -128,21 +124,30 @@ void Player::update(int elapsedTime, const Map &map)
                 m_PlayerSpeed = {0.0f, 0.0f};
                 goto end;
             }
+            if (map.getMap(x, (int)m_PlayerPos.y - 1) == 'F' || map.getMap(x + 1, (int)m_PlayerPos.y - 1) == 'F')
+            {
+                m_State = 4;
+                m_PlayerSpeed = {0.0f, 0.0f};
+                goto end;
+            }
         }
 
         y = m_PlayerPos.y;
 
-        if (getCollide(x, y, glm::vec2(mv.x, 0)))
+        if (map.getCollide(x, y, glm::vec2(mv.x, 0)))
         {
             m_PlayerPos.x += mv.x;
         }
         else
         {
+            // o personagem tem 0.5 de largura
             m_PlayerSpeed.x = 0;
             if (mv.x > 0)
-                m_PlayerPos.x = floor(x) + 0.999f;
+                // um pouquinho menos que 0.25
+                m_PlayerPos.x = floor(x) + 0.249f;
             else
-                m_PlayerPos.x = floor(x) + 0.01f;
+                // um pouquinho mais que 0.75
+                m_PlayerPos.x = floor(x) + 0.751f;
         }
 
         if (!m_Ground)

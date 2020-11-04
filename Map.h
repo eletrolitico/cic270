@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <set>
+#include <unordered_map>
 #include <glm/glm.hpp>
 
 #include "Renderer.h"
@@ -22,10 +23,13 @@ public:
     void draw(Renderer r, glm::mat4 mvp) const;
     std::set<char> getDanger() const;
     glm::vec3 getInitialPos() const;
+    bool getCollide(float x, float y, glm::vec2 dir) const;
     int m_width, m_height;
 
 private:
     std::string m_Map;
+
+    bool m_Transparent[256];
 
     std::unique_ptr<Shader> m_Shader;
     std::unique_ptr<VertexArray> m_VAO;
