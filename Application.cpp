@@ -30,11 +30,11 @@ void display()
 
 void reshape(int width, int height)
 {
-    win_width = width;
-    win_height = height;
-    glViewport(0, 0, width, height);
-    game->reshape(width, height);
-    glutPostRedisplay();
+    float dim = std::max(width / 16.0f, height / 9.0f);
+    glViewport(0, 0, dim * 16, dim * 9);
+    glutReshapeWindow(dim * 16, dim * 9);
+    win_width = dim * 16;
+    win_height = dim * 9;
 }
 
 void keyboard(unsigned char key, int x, int y)

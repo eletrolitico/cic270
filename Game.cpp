@@ -36,7 +36,7 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     tmp += "EGGGGGGGGGGGGGGGGGGGGGGGGGGGGGHF";
     tmp += "LUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU";
     tmp += "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS";
-    m_Map.push_back(new Map(tmp, 32, 11, 2, 3));
+    m_Map.push_back(new Map(tmp, 32, 11, 2, 3, 1.0));
     m_Player.m_PlayerPos = {2, 3, 0};
 
     tmp = "";
@@ -51,7 +51,7 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     tmp += "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH";
     tmp += "UUUHHHUUUUHHHHHHUUUUUUHHHHHHUUUU";
     tmp += "SSSSSSSSSSSSSSHHSSSSSSSSSSSSSSSS";
-    m_Map.push_back(new Map(tmp, 32, 11, 2, 3));
+    m_Map.push_back(new Map(tmp, 32, 11, 2, 3, 0.02));
 
     m_MapCount = 2;
 
@@ -76,7 +76,9 @@ void Game::draw(Renderer r)
     glClear(GL_COLOR_BUFFER_BIT);
 
     glm::mat4 mvp = m_Proj * m_View;
-    m_Map[m_CurrentMap]->draw(r, mvp);
+    glm::vec3 pp = m_Player.m_PlayerPos;
+
+    m_Map[m_CurrentMap]->draw(r, mvp, glm::vec2(pp.x + 0.5f, pp.y + 0.5f));
     m_Player.draw(r, mvp * glm::translate(glm::mat4(1), m_Player.m_PlayerPos));
 }
 
@@ -178,9 +180,4 @@ void Game::keyboardDown(unsigned char key, int x, int y)
 void Game::keyboardUp(unsigned char key, int x, int y)
 {
     m_keys[key] = false;
-}
-
-void Game::reshape(int width, int height)
-{
-    m_Proj = glm::ortho(0.0f, width * 9.0f / height, 0.0f, 9.0f);
 }

@@ -6,7 +6,7 @@ Map::~Map()
 {
 }
 
-Map::Map(std::string map, int w, int h, int iniX, int iniY) : m_width(w), m_height(h), m_Map(map), m_InitialPos({iniX, iniY, 0.0f})
+Map::Map(std::string map, int w, int h, int iniX, int iniY, float ambientLight) : m_width(w), m_height(h), m_Map(map), m_InitialPos({iniX, iniY, 0.0f}), m_AmbientLight(ambientLight)
 {
     int fSize = m_height * m_width * 24;
     float *positions = new float[fSize];
@@ -112,11 +112,13 @@ Tile Map::getTile(char c, int width) const
     return m_Tiles[0];
 }
 
-void Map::draw(Renderer r, glm::mat4 mvp) const
+void Map::draw(Renderer r, glm::mat4 mvp, glm::vec2 li) const
 {
     m_Texture->Bind();
     m_Shader->Bind();
     m_Shader->setUniformMat4f("u_MVP", mvp);
+    m_Shader->setUniform1f("u_AmbientLight", m_AmbientLight);
+    m_Shader->setUniform2f("lightPos", li.x, li.y);
     r.Draw(*m_VAO, *m_Shader);
 }
 

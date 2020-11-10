@@ -5,6 +5,7 @@ layout(location = 0) in vec4 position;
 layout(location = 1) in vec2 texCoord;
 
 out vec2 v_TexCoord;
+out vec2 pos;
 
 uniform mat4 u_MVP;
 
@@ -12,6 +13,7 @@ void main(){
 	gl_Position = u_MVP*position;
 	//gl_Position = position;
 	v_TexCoord = texCoord;
+	pos = position.xy;
 }										
 
 #shader fragment
@@ -20,10 +22,15 @@ void main(){
 layout(location = 0) out vec4 color;
 
 in vec2 v_TexCoord;
+in vec2 pos;
 
 uniform sampler2D u_Texture;
+uniform float u_AmbientLight;
+uniform vec2 lightPos[];
 
 void main() {
-	vec4 texColor = texture(u_Texture, v_TexCoord);
-	color = texColor;
+	vec4 tC = texture(u_Texture, v_TexCoord);
+	float l = min(u_AmbientLight + max(0.5 - (dot(pos-lightPos[0],pos-lightPos[0])/20),0),1);
+	tC = vec4(l*tC.xyz,tC.w);
+	color = tC;
 }
