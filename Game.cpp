@@ -1,12 +1,13 @@
 #include "Game.h"
 
+#include <GLFW/glfw3.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 
 Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
 {
-
     //R grama flutuante esquerda
     //T grama flutuante meio
     //Y grama flutuante direita
@@ -24,6 +25,7 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     //F fim do mapa
     //H Tijolo
     //W parede
+    Map *tempmap;
     std::string tmp = "";
     tmp += "................................";
     tmp += "...............................W";
@@ -36,7 +38,8 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     tmp += "EGGGGGGGGGGGGGGGGGGGGGGGGGGGGGHF";
     tmp += "LUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU";
     tmp += "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS";
-    m_Map.push_back(new Map(tmp, 32, 11, 2, 3, 1.0));
+    tempmap = new Map(tmp, 32, 11, 2, 3, 1.0);
+    m_Map.push_back(tempmap);
     m_Player.m_PlayerPos = {2, 3, 0};
 
     tmp = "";
@@ -48,12 +51,30 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     tmp += "WWWWWWWWWWWWWHWWWWWWWWWWWWWWWWWW";
     tmp += "WWWWWWWWWWWWHHWWWWWWWWWWWWWWWWWW";
     tmp += "WWWWWPPWWWWHHHWPPPPWWWWWWWWWWWWW";
+    tmp += "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHF";
+    tmp += "UUUHHHUUUUHHHHHHUUUUUUHHHHHHUUUU";
+    tmp += "SSSSSSSSSSSSSSHHSSSSSSSSSSSSSSSS";
+    tempmap = new Map(tmp, 32, 11, 2, 3, 0.02);
+    tempmap->addEntity(new Entity(glm::vec3(6.05f, 4.7f, 0.0f), true, "res/textures/torch.png", 17, 1.0f / 60.0f, 15, 15.0f / 50.0f));
+    m_Map.push_back(tempmap);
+
+    tmp = "";
+    tmp += "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH";
+    tmp += "HHHHHWWWWWWWWWWWWWWWWWWWWWWWWHHH";
+    tmp += "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWWHWWWWWWWWWWWWWWWWWW";
+    tmp += "WWWWWWWWWWWWHHWWWWWWWWWWWWWWWWW.";
+    tmp += "WWWWWPPWWWWHHHWPPPPWWWWWWWWWWWW.";
     tmp += "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH";
     tmp += "UUUHHHUUUUHHHHHHUUUUUUHHHHHHUUUU";
     tmp += "SSSSSSSSSSSSSSHHSSSSSSSSSSSSSSSS";
-    m_Map.push_back(new Map(tmp, 32, 11, 2, 3, 0.02));
+    tempmap = new Map(tmp, 32, 11, 2, 3, 0.02);
+    tempmap->addEntity(new Entity(glm::vec3(32.0f, 4.2f, 0.0f), true));
+    m_Map.push_back(tempmap);
 
-    m_MapCount = 2;
+    m_MapCount = 3;
 
     // Sound
     m_Sound = SoundEngine::GetInstance();
@@ -82,7 +103,7 @@ void Game::draw(Renderer r)
     m_Player.draw(r, mvp * glm::translate(glm::mat4(1), m_Player.m_PlayerPos));
 }
 
-void Game::update(int fElapsedTime)
+void Game::update(float fElapsedTime)
 {
     if (m_Player.m_State == 4)
     {
@@ -101,22 +122,22 @@ void Game::update(int fElapsedTime)
     // if not dead
     if (m_Player.m_State != 3)
     {
-        if ((m_keys[32] || m_keys['w']))
+        if ((m_keys[GLFW_KEY_SPACE] || m_keys['W']))
         {
             if (m_Player.m_Ground)
                 m_Sound->playAudio("jump");
             m_Player.jump();
         }
-        if (m_keys['d'])
+        if (m_keys['D'])
             m_Player.moveRight();
-        else if (m_keys['a'])
+        else if (m_keys['A'])
             m_Player.moveLeft();
         else
             m_Player.stop();
     }
 
     static bool music = true;
-    if (m_keys[13] && m_Player.m_State == 3)
+    if (m_keys[GLFW_KEY_ENTER] && m_Player.m_State == 3)
     {
         m_Player.m_State = 0;
         m_Player.m_PlayerPos = m_Map[m_CurrentMap]->getInitialPos();
@@ -137,7 +158,7 @@ void Game::update(int fElapsedTime)
     prevState = m_Player.m_State;
 
     static bool keyPrev = false;
-    if (m_keys['m'] && m_keys['m'] != keyPrev)
+    if (m_keys['M'] && m_keys['M'] != keyPrev)
     {
         if (music)
             m_Sound->pauseAudio("music");
@@ -145,7 +166,7 @@ void Game::update(int fElapsedTime)
             m_Sound->playAudio("music");
         music = !music;
     }
-    keyPrev = m_keys['m'];
+    keyPrev = m_keys['M'];
 
     m_Player.update(fElapsedTime, *m_Map[m_CurrentMap]);
 
@@ -154,30 +175,31 @@ void Game::update(int fElapsedTime)
     if (m_Player.m_PlayerPos.x - xScreen < 1.6)
         xScreen = m_Player.m_PlayerPos.x - 1.6;
 
-    if (xScreen < 0)
-        xScreen = 0;
+    if (xScreen < 0.01f)
+        xScreen = 0.01f;
 
-    if (xScreen > m_Map[m_CurrentMap]->m_width - 16)
-        xScreen = m_Map[m_CurrentMap]->m_width - 16;
+    if (xScreen > m_Map[m_CurrentMap]->m_width - 16.01f)
+        xScreen = m_Map[m_CurrentMap]->m_width - 16.01f;
 
     yScreen = m_Player.m_PlayerPos.y - 6.5;
 
-    if (yScreen < 0)
-        yScreen = 0;
+    if (yScreen < 0.01f)
+        yScreen = 0.01f;
 
-    if (yScreen > m_Map[m_CurrentMap]->m_height - 9)
-        yScreen = m_Map[m_CurrentMap]->m_height - 9;
+    if (yScreen > m_Map[m_CurrentMap]->m_height - 9.01f)
+        yScreen = m_Map[m_CurrentMap]->m_height - 9.01f;
 
     m_View = glm::translate(glm::mat4(1), glm::vec3(-xScreen, -yScreen, 0));
     m_Sound->update();
+    m_Map[m_CurrentMap]->update(fElapsedTime);
 }
 
-void Game::keyboardDown(unsigned char key, int x, int y)
+void Game::keyboardDown(int key)
 {
     m_keys[key] = true;
 }
 
-void Game::keyboardUp(unsigned char key, int x, int y)
+void Game::keyboardUp(int key)
 {
     m_keys[key] = false;
 }

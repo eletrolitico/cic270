@@ -18,7 +18,7 @@ CC_FLAGS = -g -c -Wall -I ./util -I ./lib
 ifeq ($(OS),Windows_NT)
   LDFLAGS = -lfreeglut -lGLEW32 -lopengl32 -lopenal
 else
-  LDFLAGS = -lglut -lGLEW -lGL -lopenal
+  LDFLAGS = -lglfw -lGLEW -lGL -lopenal
 endif
 
 # Command used at clean target

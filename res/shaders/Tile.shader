@@ -19,6 +19,8 @@ void main(){
 #shader fragment
 #version 330 core
 
+#define MAX_LIGHTS 20
+
 layout(location = 0) out vec4 color;
 
 in vec2 v_TexCoord;
@@ -26,11 +28,16 @@ in vec2 pos;
 
 uniform sampler2D u_Texture;
 uniform float u_AmbientLight;
-uniform vec2 lightPos[];
+uniform vec2 lightPos[MAX_LIGHTS];
 
 void main() {
 	vec4 tC = texture(u_Texture, v_TexCoord);
-	float l = min(u_AmbientLight + max(0.5 - (dot(pos-lightPos[0],pos-lightPos[0])/20),0),1);
+	float l = 0; 
+	for(int i=0;i<MAX_LIGHTS;i++){
+		if(lightPos[i] != 0){
+			l = min(min(u_AmbientLight + max(1- (dot(pos-lightPos[i],pos-lightPos[i])/10),0),1)+l,1);
+		}
+	}
 	tC = vec4(l*tC.xyz,tC.w);
 	color = tC;
 }

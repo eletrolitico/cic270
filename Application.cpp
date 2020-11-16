@@ -3,7 +3,7 @@
 #include <signal.h>
 #endif
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+#include <GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -20,62 +20,6 @@ Renderer renderer;
 
 Game *game;
 
-void display()
-{
-
-    game->draw(renderer);
-
-    glutSwapBuffers();
-}
-
-void reshape(int width, int height)
-{
-    float dim = std::max(width / 16.0f, height / 9.0f);
-    glViewport(0, 0, dim * 16, dim * 9);
-    glutReshapeWindow(dim * 16, dim * 9);
-    win_width = dim * 16;
-    win_height = dim * 9;
-}
-
-void keyboard(unsigned char key, int x, int y)
-{
-    switch (key)
-    {
-    case 27:
-        exit(0);
-    case 'q':
-    case 'Q':
-        exit(0);
-    }
-    game->keyboardDown(key, x, y);
-}
-
-void keyUp(unsigned char key, int x, int y)
-{
-    game->keyboardUp(key, x, y);
-}
-
-int frame = 0, elapsedTime, timebase = 0, lastTime = 0;
-void idleFunc()
-{
-    frame++;
-    elapsedTime = glutGet(GLUT_ELAPSED_TIME);
-
-    if (elapsedTime - timebase > 1000)
-    {
-        float fps = frame * 1000.0 / (elapsedTime - timebase);
-        timebase = elapsedTime;
-        frame = 0;
-        char msg[30];
-        sprintf(msg, "fps: %.3f", fps);
-        glutSetWindowTitle(msg);
-    }
-    if (elapsedTime - lastTime > 0)
-        game->update(elapsedTime - lastTime);
-    lastTime = elapsedTime;
-    glutPostRedisplay();
-}
-
 void messageCallback(GLenum source​, GLenum type​, GLuint id​, GLenum severity​, GLsizei length​, const GLchar *message​, const void *userParam​)
 {
     std::cout << source​ << type​ << id​ << severity​ << message​ << std::endl;
@@ -86,33 +30,110 @@ void messageCallback(GLenum source​, GLenum type​, GLuint id​, GLenum seve
 #endif
 }
 
+static void error_callback(int error, const char *description)
+{
+    fprintf(stderr, "Error: %s\n", description);
+#ifdef WIN32
+    DebugBreak();
+#else
+    raise(SIGTRAP);
+#endif
+}
+
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+    if (action == GLFW_PRESS)
+        game->keyboardDown(key);
+
+    if (action == GLFW_RELEASE)
+        game->keyboardUp(key);
+}
+
+static void resize_callback(GLFWwindow *win, int w, int h)
+{
+    glViewport(0, 0, w, h);
+}
+
 int main(int argc, char **argv)
 {
-    glutInit(&argc, argv);
-    glutInitContextVersion(3, 3);
-    glutInitContextProfile(GLUT_CORE_PROFILE);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowSize(win_width, win_height);
-    glutCreateWindow(argv[0]);
-    glewExperimental = GL_TRUE;
-    glewInit();
+    GLFWwindow *window;
 
-    glEnable(GL_KHR_debug);
-    glDebugMessageCallback(messageCallback, NULL);
+    glfwSetErrorCallback(error_callback);
+
+    if (glfwInit() != GLFW_TRUE)
+        exit(EXIT_FAILURE);
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+
+    window = glfwCreateWindow(win_width, win_height, "fps: -", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        exit(EXIT_FAILURE);
+    }
+
+    glfwSetKeyCallback(window, key_callback);
+
+    glfwMakeContextCurrent(window);
+
+    glfwSwapInterval(1);
+
+    glfwSetWindowAspectRatio(window, 16, 9);
+    glfwSetWindowSizeCallback(window, resize_callback);
+
+    glewExperimental = GL_TRUE;
+
+    if (glewInit() != GLEW_OK)
+    {
+        std::cout << "Glew init error" << std::endl;
+        exit(1);
+    }
+
+    if (GLEW_KHR_debug)
+    {
+        std::cout << "Debug ext available! Enabled!" << std::endl;
+        glEnable(GL_KHR_debug);
+        glDebugMessageCallback(messageCallback, NULL);
+    }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
     game = new Game();
 
-    glutReshapeFunc(reshape);
-    glutDisplayFunc(display);
-    glutKeyboardFunc(keyboard);
-    glutKeyboardUpFunc(keyUp);
-    glutIdleFunc(idleFunc);
-    glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+    int frame = 0;
+    double elapsedTime, timebase = 0, lastTime = 0;
+    while (!glfwWindowShouldClose(window))
+    {
 
-    glutMainLoop();
+        frame++;
+        elapsedTime = glfwGetTime();
+
+        if (elapsedTime - timebase > 1)
+        {
+            float fps = frame / (elapsedTime - timebase);
+            timebase = elapsedTime;
+            frame = 0;
+            char msg[30];
+            sprintf(msg, "fps: %.3f", fps);
+            glfwSetWindowTitle(window, msg);
+        }
+
+        game->update(elapsedTime - lastTime);
+        lastTime = elapsedTime;
+
+        game->draw(renderer);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glfwDestroyWindow(window);
 
     return 0;
 }

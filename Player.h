@@ -28,7 +28,7 @@ public:
 
     Player();
     ~Player();
-    void update(int fElapsedTime, const Map &map);
+    void update(float fElapsedTime, const Map &map);
     void moveLeft();
     void moveRight();
     void stop();

@@ -60,9 +60,6 @@ Player::Player() : m_PlayerPos(glm::vec3(2, 7, 0)), m_PlayerSpeed(glm::vec2(0, 0
     // Unbind Vertex Array Object.
     m_VAO->Unbind();
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-
     m_Shader = std::make_unique<Shader>("res/shaders/Player.shader");
 }
 
@@ -85,9 +82,8 @@ void Player::draw(Renderer r, glm::mat4 mvp)
 }
 
 float accumTime = 0.0f;
-void Player::update(int elapsedTime, const Map &map)
+void Player::update(float fElapsedTime, const Map &map)
 {
-    float fElapsedTime = (float)elapsedTime / 1000.0f;
     float g = 50 * fElapsedTime;
     float x = m_PlayerPos.x;
     float y = m_PlayerPos.y;

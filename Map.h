@@ -12,20 +12,23 @@
 #include "Tile.h"
 #include "VertexBuffer.h"
 #include "Texture.h"
+#include "Entity.h"
 
 class Map
 {
 public:
     Map(std::string map, int w, int h, int, int, float);
     ~Map();
-    char getMap(int x, int y) const;
-    Tile getTile(char c, int width) const;
+    void addEntity(Entity *e);
     void draw(Renderer r, glm::mat4 mvp, glm::vec2 li) const;
+    void update(float fElapsedTime);
+    char getMap(int x, int y) const;
+    bool getCollide(float x, float y, glm::vec2 dir) const;
+    Tile getTile(char c, int width) const;
     std::set<char> getDanger() const;
     glm::vec3 getInitialPos() const;
-    bool getCollide(float x, float y, glm::vec2 dir) const;
-    int m_width, m_height;
 
+    int m_width, m_height;
     std::unique_ptr<Shader> m_Shader;
 
 private:
@@ -37,6 +40,7 @@ private:
     std::unique_ptr<VertexBuffer> m_VertexBuffer;
     std::unique_ptr<Texture> m_Texture;
     std::vector<Tile> m_Tiles;
+    std::vector<Entity *> m_Entities;
 
     float m_AmbientLight;
 
