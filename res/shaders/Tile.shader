@@ -35,7 +35,7 @@ void main() {
 	float l = 0; 
 	for(int i=0;i<MAX_LIGHTS;i++){
 		if(lightPos[i] != 0){
-			l = min(min(u_AmbientLight + max(1- (dot(pos-lightPos[i],pos-lightPos[i])/10),0),1)+l,1);
+			l = min(min(u_AmbientLight + max(1 - (dot(pos-lightPos[i],pos-lightPos[i])/10),0), 1) + l, 1);
 		}
 	}
 	tC = vec4(l*tC.xyz,tC.w);
