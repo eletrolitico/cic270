@@ -1,5 +1,7 @@
 #include <iostream>
-#ifndef WIN32
+#ifdef WIN32
+#include <debugapi.h>
+#else
 #include <signal.h>
 #endif
 #include <GL/glew.h>

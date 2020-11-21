@@ -16,7 +16,7 @@ CC=g++
 CC_FLAGS = -g -c -Wall -I ./util -I ./lib
 
 ifeq ($(OS),Windows_NT)
-  LDFLAGS = -lfreeglut -lGLEW32 -lopengl32 -lopenal
+  LDFLAGS = -lglfw3 -lGLEW32 -lopengl32 -lopenal
 else
   LDFLAGS = -lglfw -lGLEW -lGL -lopenal
 endif
