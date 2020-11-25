@@ -177,3 +177,18 @@ void Map::update(float fElapsedTime)
         e->update(fElapsedTime);
     }
 }
+
+void Map::addInvInterval(glm::vec2 interval)
+{
+    m_InvInterval.push_back(interval);
+}
+
+bool Map::isInverted(glm::vec3 pos) const
+{
+    for (glm::vec2 in : m_InvInterval)
+    {
+        if (pos.x > in.x && pos.x < in.y)
+            return true;
+    }
+    return false;
+}

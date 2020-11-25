@@ -27,6 +27,8 @@ public:
     Tile getTile(char c, int width) const;
     std::set<char> getDanger() const;
     glm::vec3 getInitialPos() const;
+    void addInvInterval(glm::vec2 interval);
+    bool isInverted(glm::vec3 pos) const;
 
     inline std::vector<Entity *> &getEntities()
     {
@@ -50,6 +52,8 @@ private:
     float m_AmbientLight;
 
     glm::vec3 m_InitialPos;
+
+    std::vector<glm::vec2> m_InvInterval;
 };
 
 #endif

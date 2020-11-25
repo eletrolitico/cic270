@@ -59,6 +59,7 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     tmp += "SSSSSSSSSSSSSSHHSSSSSSSSSSSSSSSS";
     tempmap = new Map(tmp, 32, 11, 2, 3, 0.02);
     tempmap->addEntity(new Entity(glm::vec3(6.05f, 4.7f, 0.0f), true, "res/textures/torch.png", 17, 1.0f / 60.0f, 15, 15.0f / 50.0f));
+    tempmap->addInvInterval(glm::vec2(15.0f, 20.0f));
     m_Map.push_back(tempmap);
 
     tmp = "";
@@ -122,6 +123,7 @@ void Game::update(float fElapsedTime)
                 i->getPos().y + 1 > m_Player.m_PlayerPos.y)
             {
                 m_Player.setBig();
+                delete e;
                 to_remove.push_back(p);
             }
         }

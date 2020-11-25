@@ -41,6 +41,8 @@ private:
     std::unique_ptr<Texture> m_Texture;
     bool m_Mirror = false;
     bool m_IsBig = false;
+    bool m_IsInverted = false;
+    float m_Rotation = 0.0f;
 
     int m_Frame = 0;
 };

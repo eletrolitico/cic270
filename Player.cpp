@@ -72,6 +72,10 @@ void Player::draw(Renderer r, glm::mat4 mvp)
 {
     m_Shader->Bind();
     m_Texture->Bind();
+    glm::mat4 trans = glm::translate(glm::vec3(-0.5f, -0.5f, 0.0f));
+    glm::mat4 trans2 = glm::translate(glm::vec3(0.5f, 0.5f, 0.0f));
+    mvp = mvp * trans2 * glm::rotate(glm::radians(m_Rotation), glm::vec3(0.0f, 0.0f, 1.0f)) * trans;
+
     if (m_IsBig)
     {
         mvp = mvp * glm::scale(glm::vec3(1.2f, 2.0f, 0.0f));
@@ -92,6 +96,21 @@ void Player::update(float fElapsedTime, const Map &map)
     float g = 50 * fElapsedTime;
     float x = m_PlayerPos.x;
     float y = m_PlayerPos.y;
+    if (map.isInverted(m_PlayerPos))
+    {
+        g = -g;
+        m_IsInverted = true;
+        m_Rotation += 500 * fElapsedTime;
+    }
+    else
+    {
+        m_IsInverted = false;
+        m_Rotation -= 500 * fElapsedTime;
+    }
+    if (m_Rotation > 180.0f)
+        m_Rotation = 180.0f;
+    if (m_Rotation < 0.0f)
+        m_Rotation = 0.0f;
 
     if (m_State != 3)
     {
@@ -107,7 +126,7 @@ void Player::update(float fElapsedTime, const Map &map)
         }
         else
         {
-            if (mv.y < 0)
+            if ((mv.y < 0 && !m_IsInverted) || (mv.y > 0 && m_IsInverted))
                 m_Ground = true;
             else
                 m_Ground = false;
@@ -189,7 +208,7 @@ void Player::moveLeft()
     if (m_PlayerSpeed.x > -10)
         m_PlayerSpeed.x -= 1;
     m_State = 1;
-    m_Mirror = true;
+    m_Mirror = !m_IsInverted;
 }
 
 void Player::moveRight()
@@ -197,7 +216,7 @@ void Player::moveRight()
     if (m_PlayerSpeed.x < 10)
         m_PlayerSpeed.x += 1;
     m_State = 1;
-    m_Mirror = false;
+    m_Mirror = m_IsInverted;
 }
 
 void Player::stop()
@@ -216,7 +235,7 @@ void Player::jump()
 {
     if (m_Ground)
     {
-        m_PlayerSpeed.y += sqrt(2 * 50 * 3.5);
+        m_PlayerSpeed.y += (1 - 2 * m_IsInverted) * sqrt(2 * 50 * 3.5);
         m_Frame = 0;
     }
 }
