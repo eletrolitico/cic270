@@ -32,6 +32,7 @@ public:
 	void setUniform1i(const std::string &name, int i);
 	void setUniform1f(const std::string &name, float f);
 	void setUniform2f(const std::string &name, float f1, float f2);
+	void setUniform2f(const std::string &name, glm::vec2 f);
 	void setUniform4f(const std::string &name, float f1, float f2, float f3, float f4);
 	void setUniformMat4f(const std::string &name, const glm::mat4 &matrix);
 

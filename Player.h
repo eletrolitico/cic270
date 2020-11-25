@@ -10,15 +10,6 @@
 
 class Player
 {
-private:
-    std::unique_ptr<Shader> m_Shader;
-    std::unique_ptr<VertexArray> m_VAO;
-    std::unique_ptr<VertexBuffer> m_VertexBuffer;
-    std::unique_ptr<Texture> m_Texture;
-    bool m_Mirror = false;
-
-    int m_Frame = 0;
-
 public:
     glm::vec3 m_PlayerPos;
     glm::vec2 m_PlayerSpeed;
@@ -34,6 +25,24 @@ public:
     void stop();
     void jump();
     void draw(Renderer r, glm::mat4 mvp);
+    inline void setBig()
+    {
+        m_IsBig = true;
+    }
+    inline void setSmall()
+    {
+        m_IsBig = false;
+    }
+
+private:
+    std::unique_ptr<Shader> m_Shader;
+    std::unique_ptr<VertexArray> m_VAO;
+    std::unique_ptr<VertexBuffer> m_VertexBuffer;
+    std::unique_ptr<Texture> m_Texture;
+    bool m_Mirror = false;
+    bool m_IsBig = false;
+
+    int m_Frame = 0;
 };
 
 #endif

@@ -28,6 +28,11 @@ public:
     std::set<char> getDanger() const;
     glm::vec3 getInitialPos() const;
 
+    inline std::vector<Entity *> &getEntities()
+    {
+        return m_Entities;
+    }
+
     int m_width, m_height;
     std::unique_ptr<Shader> m_Shader;
 

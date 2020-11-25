@@ -126,6 +126,14 @@ void Shader::setUniform2f(const std::string &name, float f1, float f2)
 	glUniform2f(location, f1, f2);
 }
 
+void Shader::setUniform2f(const std::string &name, glm::vec2 f)
+{
+	int location = GetUniformLocation(name);
+	if (location == -1)
+		return;
+	glUniform2f(location, f.x, f.y);
+}
+
 void Shader::setUniform1i(const std::string &name, int i)
 {
 	int location = GetUniformLocation(name);

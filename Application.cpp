@@ -20,9 +20,9 @@ Renderer renderer;
 
 Game *game;
 
-void messageCallback(GLenum source​, GLenum type​, GLuint id​, GLenum severity​, GLsizei length​, const GLchar *message​, const void *userParam​)
+void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length​, const GLchar *message, const void *userParam​)
 {
-    std::cout << source​ << type​ << id​ << severity​ << message​ << std::endl;
+    std::cout << source << type << id << severity << message << std::endl;
 #ifdef WIN32
     DebugBreak();
 #else
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     {
         std::cout << "Debug ext available! Enabled!" << std::endl;
         glEnable(GL_KHR_debug);
-        glDebugMessageCallback(messageCallback, NULL);
+        glDebugMessageCallback(message_callback, NULL);
     }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -6,6 +6,8 @@
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 
+#include "Item.h"
+
 Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
 {
     //R grama flutuante esquerda
@@ -39,6 +41,7 @@ Game::Game() : m_Proj(glm::ortho(0.0f, 16.0f, 0.0f, 9.0f)), m_View(glm::mat4(1))
     tmp += "LUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU";
     tmp += "ASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS";
     tempmap = new Map(tmp, 32, 11, 2, 3, 1.0);
+    tempmap->addEntity(new Item(glm::vec3(13.0f, 9.0f, 0.0f), glm::vec2(5.0f, 0.0f), tempmap));
     m_Map.push_back(tempmap);
     m_Player.m_PlayerPos = {2, 3, 0};
 
@@ -105,6 +108,29 @@ void Game::draw(Renderer r)
 
 void Game::update(float fElapsedTime)
 {
+    std::vector<int> to_remove;
+    int p = 0;
+    std::vector<Entity *> &vec = m_Map[m_CurrentMap]->getEntities();
+    for (Entity *e : vec)
+    {
+        Item *i = dynamic_cast<Item *>(e);
+        if (i != NULL)
+        {
+            if (i->getPos().x < m_Player.m_PlayerPos.x + 1 &&
+                i->getPos().x + 1 > m_Player.m_PlayerPos.x &&
+                i->getPos().y < m_Player.m_PlayerPos.y + 1 &&
+                i->getPos().y + 1 > m_Player.m_PlayerPos.y)
+            {
+                m_Player.setBig();
+                to_remove.push_back(p);
+            }
+        }
+        p++;
+    }
+    for (int i : to_remove | std::views::reverse)
+    {
+        vec.erase(vec.begin() + i);
+    }
     if (m_Player.m_State == 4)
     {
         m_CurrentMap++;
@@ -141,6 +167,7 @@ void Game::update(float fElapsedTime)
     {
         m_Player.m_State = 0;
         m_Player.m_PlayerPos = m_Map[m_CurrentMap]->getInitialPos();
+        m_Player.setSmall();
         if (!music)
         {
             music = true;

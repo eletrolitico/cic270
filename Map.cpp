@@ -129,7 +129,10 @@ void Map::draw(Renderer r, glm::mat4 mvp, glm::vec2 li) const
     for (Entity *e : m_Entities)
     {
         if (e->hasLight())
-            m_Shader->setUniform2f("lightPos[" + std::to_string(ll++) + "]", e->getPos().x, e->getPos().y);
+        {
+            m_Shader->Bind();
+            m_Shader->setUniform2f("lightPos[" + std::to_string(ll++) + "]", e->getLightPos());
+        }
         if (ll > 19)
             break;
 

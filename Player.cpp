@@ -2,6 +2,7 @@
 
 #include "VertexBufferLayout.h"
 
+#include <glm/gtx/transform.hpp>
 float ts = 32;
 
 Player::Player() : m_PlayerPos(glm::vec3(2, 7, 0)), m_PlayerSpeed(glm::vec2(0, 0))
@@ -71,6 +72,10 @@ void Player::draw(Renderer r, glm::mat4 mvp)
 {
     m_Shader->Bind();
     m_Texture->Bind();
+    if (m_IsBig)
+    {
+        mvp = mvp * glm::scale(glm::vec3(1.2f, 2.0f, 0.0f));
+    }
     m_Shader->setUniformMat4f("u_MVP", mvp);
     m_Shader->setUniform1i("u_State", 3 - m_State);
     m_Shader->setUniform1i("u_Frame", m_Frame);

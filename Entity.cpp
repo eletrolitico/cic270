@@ -4,7 +4,7 @@
 #include "VertexBufferLayout.h"
 
 Entity::Entity(glm::vec3 pos, bool hasLight, const std::string &tex, int frames, float frameTime, int texSkip, float aspect) : m_EntityPos(pos), m_HasLight(hasLight),
-                                                                                                                               m_Frames(frames), m_TexSkip(texSkip), m_FrameTime(frameTime)
+                                                                                                                               m_Frames(frames), m_TexSkip(texSkip), m_FrameTime(frameTime), m_Aspect(aspect)
 {
     if (tex != "")
     {
@@ -14,33 +14,33 @@ Entity::Entity(glm::vec3 pos, bool hasLight, const std::string &tex, int frames,
         int tw = m_Texture->GetWidth();
 
         float positions[] = {
-            -aspect / 2.0f,
-            -0.5f,
+            0.0f,
+            0.0f,
             0,
             0,
 
-            aspect / 2.0f,
-            -0.5f,
+            aspect,
+            0.0f,
             m_TexSkip / (float)tw,
             0,
 
-            -aspect / 2.0f,
-            0.5f,
+            0.0f,
+            1.0f,
             0,
             1,
 
-            aspect / 2.0f,
-            -0.5f,
+            aspect,
+            0.0f,
             m_TexSkip / (float)tw,
             0,
 
-            -aspect / 2.0f,
-            0.5f,
+            0.0f,
+            1.0f,
             0,
             1,
 
-            aspect / 2.0f,
-            0.5f,
+            aspect,
+            1.0f,
             m_TexSkip / (float)tw,
             1,
         };
@@ -105,6 +105,11 @@ void Entity::update(float fElapsedTime)
 glm::vec3 Entity::getPos() const
 {
     return glm::vec3(m_EntityPos);
+}
+
+glm::vec2 Entity::getLightPos() const
+{
+    return glm::vec2(m_EntityPos.x + m_Aspect / 2.0f, m_EntityPos.y + 0.5f);
 }
 
 bool Entity::hasLight() const
