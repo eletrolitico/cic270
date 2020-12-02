@@ -17,6 +17,7 @@ CC_FLAGS = -g -c -Wall -I ./util -I ./lib -std=c++20
 
 ifeq ($(OS),Windows_NT)
   LDFLAGS = -lglfw3 -lGLEW32 -lopengl32 -lopenal
+  CC_FLAGS += -D WIN32
 else
   LDFLAGS = -lglfw -lGLEW -lGL -lopenal
 endif
