@@ -14,7 +14,7 @@ void main(){
 	//gl_Position = position;
 	v_TexCoord = texCoord;
 	pos = position.xy;
-}										
+}
 
 #shader fragment
 #version 330 core
@@ -32,9 +32,9 @@ uniform vec2 lightPos[MAX_LIGHTS];
 
 void main() {
 	vec4 tC = texture(u_Texture, v_TexCoord);
-	float l = 0; 
+	float l = 0;
 	for(int i=0;i<MAX_LIGHTS;i++){
-		if(lightPos[i] != 0){
+		if(lightPos[i] != vec2(0,0)){
 			l = min(min(u_AmbientLight + max(1 - (dot(pos-lightPos[i],pos-lightPos[i])/10),0), 1) + l, 1);
 		}
 	}

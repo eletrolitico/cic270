@@ -15,8 +15,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 
-int win_width = 1280;
-int win_height = 720;
+int win_width = 1920;
+int win_height = 1080;
 
 Renderer renderer;
 
@@ -35,11 +35,6 @@ void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GL
 static void error_callback(int error, const char *description)
 {
     fprintf(stderr, "Error: %s\n", description);
-#ifdef WIN32
-    DebugBreak();
-#else
-    raise(SIGTRAP);
-#endif
 }
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -68,9 +63,12 @@ int main(int argc, char **argv)
     if (glfwInit() != GLFW_TRUE)
         exit(EXIT_FAILURE);
 
+    std::cout << "Initialized GLFW" << std::endl;
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(win_width, win_height, "fps: -", NULL, NULL);
     if (!window)
@@ -78,6 +76,7 @@ int main(int argc, char **argv)
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
+    std::cout << "Created window" << std::endl;
 
     glfwSetKeyCallback(window, key_callback);
 
@@ -90,10 +89,14 @@ int main(int argc, char **argv)
 
     glewExperimental = GL_TRUE;
 
-    if (glewInit() != GLEW_OK)
+    auto err = glewInit();
+    if (err != GLEW_OK)
     {
-        std::cout << "Glew init error" << std::endl;
-        exit(1);
+        std::cout << "Glew init error " << err << ": " << glewGetErrorString(err) << std::endl;
+        if (err != 4)
+        {
+            exit(1);
+        }
     }
 
     if (GLEW_KHR_debug)

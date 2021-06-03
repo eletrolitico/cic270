@@ -16,11 +16,13 @@ uniform float u_OffsetY;
 void main(){
 	gl_Position = u_MVP*position;
 	//gl_Position = position;
-	if(u_Mirror)
+	if(u_Mirror){
 		v_TexCoord = vec2(texCoord.x*-1+u_OffsetX+u_Frame*u_OffsetX,texCoord.y+u_State*u_OffsetY);
-	else
+	}
+	else{
 		v_TexCoord = vec2(texCoord.x+u_Frame*u_OffsetX,texCoord.y+u_State*u_OffsetY);
-}										
+	}
+}
 
 #shader fragment
 #version 330 core

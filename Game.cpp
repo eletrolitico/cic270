@@ -129,9 +129,9 @@ void Game::update(float fElapsedTime)
         }
         p++;
     }
-    for (int i : to_remove | std::views::reverse)
+    for (auto i = to_remove.rbegin(); i < to_remove.rend(); ++i)
     {
-        vec.erase(vec.begin() + i);
+        vec.erase(vec.begin() + *i);
     }
     if (m_Player.m_State == 4)
     {
